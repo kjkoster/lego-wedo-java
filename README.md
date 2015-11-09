@@ -2,12 +2,11 @@
 Java library for LEGO WeDo, supports multiple hubs
 
 # Getting Started
-Here's a quick way to get started.
+Here's a quick way to get started. First, clone and build the code.
 
     $ git clone https://github.com/kjkoster/lego-wedo-java.git
     $ cd lego-wedo-java
     $ mvn package
-    $ _
 
 Then hook up your WeDo to the USB port with (at least) a motor.
 
