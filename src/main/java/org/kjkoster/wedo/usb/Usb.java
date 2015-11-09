@@ -151,6 +151,10 @@ public class Usb {
 
         final HIDDevice hidDevice = HIDManager.getInstance().openByPath(
                 handle.getPath());
+        if (hidDevice == null) {
+            throw new IOException(format("could not open device %s",
+                    handle.getPath()));
+        }
         final int bytesWritten = hidDevice.write(buffer);
         if (bytesWritten != buffer.length) {
             throw new IOException(format(
