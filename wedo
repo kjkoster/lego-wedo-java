@@ -1,0 +1,6 @@
+#!/bin/sh
+#
+# A command line utility to interface with LEGO WeDo blocks.
+#
+
+java -cp /Users/kjkoster/workspace/wedo/target/classes:/Users/kjkoster/.m2/repository/com/codeminders/hidapi/1.1/hidapi-1.1.jar:/Users/kjkoster/.m2/repository/com/google/guava/guava/18.0/guava-18.0.jar org.kjkoster.wedo.WeDo ${*}
