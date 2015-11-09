@@ -18,3 +18,11 @@ Then hook up your WeDo to the USB port with (at least) a motor.
     $ ./wedo motor 127
     $ ./wedo reset
 
+
+# Reference
+This code was written using these projects as a reference:
+- https://github.com/itdaniher/WeDoMore
+- https://github.com/Salaboy/lego-wedo4j
+- https://github.com/PetrGlad/lego-wedo4j
+- https://github.com/LLK/scratchx/blob/gh-pages/scratch_extensions/wedoExtension.js
+
