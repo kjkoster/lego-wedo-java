@@ -85,9 +85,9 @@ public class Usb {
 
     private void readFromHandle(final Handle handle, final int bytesToRead,
             final Map<Handle, byte[]> packets) {
+        HIDDevice hidDevice = null;
         try {
-            final HIDDevice hidDevice = HIDManager.getInstance().openByPath(
-                    handle.getPath());
+            hidDevice = HIDManager.getInstance().openByPath(handle.getPath());
             if (hidDevice == null) {
                 log.warning(format(
                         "unable to open device %s, claimed by another application?",
@@ -120,6 +120,16 @@ public class Usb {
             log.log(WARNING,
                     format("unexpected exception reading from %s: %s", handle,
                             e.getMessage()), e);
+        } finally {
+            if (hidDevice != null) {
+                try {
+                    hidDevice.close();
+                } catch (IOException e) {
+                    log.log(WARNING,
+                            format("unexpected exception closing %s: %s",
+                                    handle, e.getMessage()), e);
+                }
+            }
         }
     }
 
@@ -149,17 +159,29 @@ public class Usb {
             log.fine(logline);
         }
 
-        final HIDDevice hidDevice = HIDManager.getInstance().openByPath(
-                handle.getPath());
-        if (hidDevice == null) {
-            throw new IOException(format("could not open device %s",
-                    handle.getPath()));
-        }
-        final int bytesWritten = hidDevice.write(buffer);
-        if (bytesWritten != buffer.length) {
-            throw new IOException(format(
-                    "expected to write %d bytes to %s, but wrote %d",
-                    buffer.length, handle, bytesWritten));
+        HIDDevice hidDevice = null;
+        try {
+            hidDevice = HIDManager.getInstance().openByPath(handle.getPath());
+            if (hidDevice == null) {
+                throw new IOException(format("could not open device %s",
+                        handle.getPath()));
+            }
+            final int bytesWritten = hidDevice.write(buffer);
+            if (bytesWritten != buffer.length) {
+                throw new IOException(format(
+                        "expected to write %d bytes to %s, but wrote %d",
+                        buffer.length, handle, bytesWritten));
+            }
+        } finally {
+            if (hidDevice != null) {
+                try {
+                    hidDevice.close();
+                } catch (IOException e) {
+                    log.log(WARNING,
+                            format("unexpected exception closing %s: %s",
+                                    handle, e.getMessage()), e);
+                }
+            }
         }
     }
 }
