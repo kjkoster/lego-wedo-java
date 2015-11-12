@@ -11,6 +11,8 @@ import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -313,5 +315,45 @@ public class WeDoBricks {
             write(hub.getValue()[0], (byte) 0x00);
             write(hub.getValue()[1], (byte) 0x00);
         }
+    }
+
+    /**
+     * Read all distance sensors.
+     * 
+     * @return The distance values. May be empty, but is never <code>null</code>
+     * @throws IOException
+     *             When there was a problem accessing the USB subsystem.
+     */
+    public Collection<Distance> distances() throws IOException {
+        final Collection<Distance> distances = new ArrayList<>();
+        for (final Brick[] brick : readAll().values()) {
+            if (brick[0].getType() == DISTANCE) {
+                distances.add(brick[0].getDistance());
+            }
+            if (brick[1].getType() == DISTANCE) {
+                distances.add(brick[1].getDistance());
+            }
+        }
+        return distances;
+    }
+
+    /**
+     * Read all tilt sensors.
+     * 
+     * @return The tilt values. May be empty, but is never <code>null</code> .
+     * @throws IOException
+     *             When there was a problem accessing the USB subsystem.
+     */
+    public Collection<Tilt> tilts() throws IOException {
+        final Collection<Tilt> tilts = new ArrayList<>();
+        for (final Brick[] brick : readAll().values()) {
+            if (brick[0].getType() == TILT) {
+                tilts.add(brick[0].getTilt());
+            }
+            if (brick[1].getType() == TILT) {
+                tilts.add(brick[1].getTilt());
+            }
+        }
+        return tilts;
     }
 }
