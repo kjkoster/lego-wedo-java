@@ -81,18 +81,28 @@ public class Usb implements Closeable {
                 .listDevices()) {
             if (hidDeviceInfo.getVendor_id() == VENDORID_LEGO
                     && hidDeviceInfo.getProduct_id() == PRODUCTID_WEDOHUB) {
-                readFromHandle(new Handle(hidDeviceInfo.getPath(),
-                        hidDeviceInfo.getProduct_string()), bytesToRead,
-                        packets);
+                read(hidDeviceInfo, bytesToRead, packets);
             }
         }
 
         return packets;
     }
 
-    private void readFromHandle(final Handle handle, final int bytesToRead,
+    private void read(final HIDDeviceInfo hidDeviceInfo, final int bytesToRead,
             final Map<Handle, byte[]> packets) {
         try {
+            final String productName = hidDeviceInfo.getProduct_string();
+            if (productName == null) {
+                // Typically a USB device permissions issue under Linux. If that
+                // is the case, you may need udev rules.
+                log.warning(format(
+                        "Unable to read product name from %s, permission issue?",
+                        hidDeviceInfo.getPath()));
+                return;
+            }
+            final Handle handle = new Handle(hidDeviceInfo.getPath(),
+                    productName);
+
             final byte[] buffer = new byte[bytesToRead];
             final int bytesRead = open(handle).readTimeout(buffer,
                     (int) MILLISECONDS.toMillis(100L));
@@ -116,8 +126,8 @@ public class Usb implements Closeable {
             packets.put(handle, buffer);
         } catch (IOException e) {
             log.log(WARNING,
-                    format("unexpected exception reading from %s: %s", handle,
-                            e.getMessage()), e);
+                    format("unexpected exception reading from %s: %s",
+                            hidDeviceInfo.getPath(), e.getMessage()), e);
         }
     }
 
