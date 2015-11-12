@@ -17,7 +17,19 @@ Then hook up your WeDo to the USB port with (at least) a motor.
     $ ./wedo motor 127
     $ ./wedo reset
 
+#USB Permissions Under Linux
+By default, the WeDo hubs get permissions that allow only root to write to the device. Here is the typical warning that you get in this situation.
 
+    $ ./wedo list
+    Nov 12, 2015 9:56:01 AM org.kjkoster.wedo.usb.Usb read
+    WARNING: Unable to read product name from 0006:0004:00, permission issue?
+    No LEGO WeDo hubs found.
+
+To grant non-root users to access the WeDo devices, create a file named /etc/udev/rules.d/wedo.rules with the following incantation:
+
+    ATTRS{idVendor}=="0694", ATTRS{idProduct}=="0003", SUBSYSTEMS=="usb", ACTION=="add", MODE="0666"
+ 
+Then unplug the WeDO hubs and plug them back in. Your LEGO WeDo hubs should now be accessible.
 # Reference
 This code was written using these projects as a reference:
 - https://github.com/itdaniher/WeDoMore
