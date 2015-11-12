@@ -41,7 +41,7 @@ public class WeDo {
             }
         });
 
-        try {
+        try (final Usb usb = new Usb()) {
             boolean verbose = false;
             final List<String> options = new ArrayList<>();
             for (final String arg : args) {
@@ -56,7 +56,7 @@ public class WeDo {
                 System.exit(1);
             }
 
-            weDoBricks = new WeDoBricks(new Usb(), verbose);
+            weDoBricks = new WeDoBricks(usb, verbose);
 
             final String command = options.remove(0);
             switch (command) {
