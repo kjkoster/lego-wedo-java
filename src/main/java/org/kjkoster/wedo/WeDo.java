@@ -6,6 +6,7 @@ import static java.lang.System.out;
 import static java.lang.Thread.setDefaultUncaughtExceptionHandler;
 
 import java.io.IOException;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,7 @@ public class WeDo {
      *            <code>usage()</code>.
      */
     public static void main(String[] args) {
-        setDefaultUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+        setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
             @Override
             public void uncaughtException(Thread t, Throwable e) {
                 e.printStackTrace();

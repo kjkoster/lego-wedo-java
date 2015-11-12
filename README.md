@@ -1,5 +1,5 @@
 # lego-wedo-java
-Java library for LEGO WeDo, supports multiple hubs
+Another Java library for LEGO WeDo. This library supports multiple hubs.
 
 # Getting Started
 Here's a quick way to get started. First, clone and build the code.
