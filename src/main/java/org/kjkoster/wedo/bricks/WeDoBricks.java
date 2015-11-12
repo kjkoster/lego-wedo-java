@@ -169,14 +169,38 @@ public class WeDoBricks {
         return type;
     }
 
+    /**
+     * Start all motors. This does nothing if no motor was found.
+     * 
+     * @param speed
+     *            The speed to run the motor at (-127 to 127).
+     * @throws IOException
+     *             When there was a problem accessing the USB subsystem.
+     */
     public void motor(final byte speed) throws IOException {
         actuator(true, true, speed, true, false);
     }
 
+    /**
+     * Start all motors on connector A. This does nothing if no motor was found.
+     * 
+     * @param speed
+     *            The speed to run the motor at (-127 to 127).
+     * @throws IOException
+     *             When there was a problem accessing the USB subsystem.
+     */
     public void motorA(final byte speed) throws IOException {
         actuator(true, false, speed, true, false);
     }
 
+    /**
+     * Start all motors on connector B. This does nothing if no motor was found.
+     * 
+     * @param speed
+     *            The speed to run the motor at (-127 to 127).
+     * @throws IOException
+     *             When there was a problem accessing the USB subsystem.
+     */
     public void motorB(final byte speed) throws IOException {
         actuator(false, true, speed, true, false);
     }
@@ -266,7 +290,7 @@ public class WeDoBricks {
         buffer[8] = 0;
 
         if (verbose) {
-            out.printf("write command to %s.\n", brick.getHandle());
+            out.printf("Write command to %s.\n", brick.getHandle());
             out.printf(
                     "  raw 0x%02x 0x%02x [value A: 0x%02x] [value B: 0x%02x] 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
                     buffer[0], buffer[1], buffer[2], buffer[3], buffer[4],
