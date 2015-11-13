@@ -159,15 +159,30 @@ public class WeDo {
             out.println("No LEGO WeDo hubs found.");
         } else {
             for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+
                 out.println(hub.getKey().getProductName());
-                out.println("  brick A: "
-                        + hub.getValue()[0].getType().toString().toLowerCase()
-                                .replace("_", " "));
-                out.println("  brick b: "
-                        + hub.getValue()[1].getType().toString().toLowerCase()
-                                .replace("_", " "));
+                listBrick(true, hub.getValue()[0]);
+                listBrick(false, hub.getValue()[1]);
             }
         }
+    }
+
+    private static void listBrick(final boolean isA, final Brick brick) {
+        String sensorData = "";
+        switch (brick.getType()) {
+        case DISTANCE:
+            sensorData = ": " + brick.getDistance().getCm() + " cm";
+            break;
+        case TILT:
+            sensorData = ": "
+                    + brick.getTilt().getDirection().toString().toLowerCase()
+                            .replace("_", " ");
+            break;
+        default:
+        }
+        out.println("  brick " + (isA ? "A" : "B") + ": "
+                + brick.getType().toString().toLowerCase().replace("_", " ")
+                + sensorData);
     }
 
     private static void sensor(int repeat, final boolean showDistance,
@@ -187,9 +202,9 @@ public class WeDo {
                     case TILT:
                         if (showTilt) {
                             final Tilt tilt = brick.getTilt();
-                            out.printf("tilt %s angle %d (value %d)\n", tilt
-                                    .getDirection().toLowerCase(), tilt
-                                    .getAngle(), tilt.getValue());
+                            out.printf("tilt %s (value %d)\n", tilt
+                                    .getDirection().toString().toLowerCase()
+                                    .replace("_", " "), tilt.getValue());
                         }
                         break;
                     case MOTOR:

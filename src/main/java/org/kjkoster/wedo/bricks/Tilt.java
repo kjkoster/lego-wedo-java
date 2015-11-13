@@ -1,7 +1,20 @@
 package org.kjkoster.wedo.bricks;
 
+import static java.lang.String.format;
+import static org.kjkoster.wedo.bricks.Tilt.Direction.BACKWARD;
+import static org.kjkoster.wedo.bricks.Tilt.Direction.FORWARD;
+import static org.kjkoster.wedo.bricks.Tilt.Direction.LEFT;
+import static org.kjkoster.wedo.bricks.Tilt.Direction.NO_TILT;
+import static org.kjkoster.wedo.bricks.Tilt.Direction.RIGHT;
+
 /**
- * The representation of a single sample from a tilt sensor.
+ * The representation of a single sample from a tilt sensor. These directions
+ * are taken with the wire of the sensor facing towards you.
+ * <p>
+ * The tilt sensor does not tell us a whole lot when it is not slightly tilted.
+ * I chose to lump all of those under <code>NO_TILT</code> rather than calling
+ * it flat. The same value comes out when the sensor is placed on its side or
+ * straight up.
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
@@ -28,19 +41,59 @@ public class Tilt {
     }
 
     /**
-     * @return
+     * The tilt directions.
      */
-    public String getDirection() {
-        // XXX
-        return "XXX-dir";
+    public enum Direction {
+        /**
+         * backwards tilt.
+         */
+        BACKWARD,
+
+        /**
+         * Forward tilt.
+         */
+        FORWARD,
+
+        /**
+         * Left tilt.
+         */
+        LEFT,
+
+        /**
+         * Right tilt.
+         */
+        RIGHT,
+
+        /**
+         * Flat, upright or on its side, no way to tell.
+         */
+        NO_TILT
     }
 
     /**
-     * @return
+     * Find the tilt direction, if one can be determined.
+     * 
+     * @return The tilt direction.
      */
-    public int getAngle() {
-        // XXX
-        return 40;
+    public Direction getDirection() {
+        final int tilt = (value & 0xff);
+        if (tilt > 10 && tilt < 40) {
+            return BACKWARD;
+        }
+        if (tilt > 60 && tilt < 90) {
+            return RIGHT;
+        }
+        if (tilt > 120 && tilt < 140) {
+            return NO_TILT;
+        }
+        if (tilt > 170 && tilt < 190) {
+            return FORWARD;
+        }
+        if (tilt > 220 && tilt < 240) {
+            return LEFT;
+        }
+        throw new IllegalArgumentException(format("unknown tilt value 0x%02x",
+                value));
     }
 
     /**
@@ -48,22 +101,6 @@ public class Tilt {
      */
     @Override
     public String toString() {
-        int tilt = (value & 0xff);
-        String d;
-        if (tilt > 10 && tilt < 40) {
-            d = "Tilt.BACK";
-        } else if (tilt > 60 && tilt < 90) {
-            d = "Tilt.RIGHT";
-        } else if (tilt > 120 && tilt < 140) {
-            d = "Tilt.NO_TILT";
-        } else if (tilt > 170 && tilt < 190) {
-            d = "Tilt.FORWARD";
-        } else if (tilt > 220 && tilt < 240) {
-            d = "Tilt.LEFT";
-        } else {
-            // XXX
-            d = "Tilt.NO_TILTXXX";
-        }
-        return String.format("[tilt 0x%02x %d %s]", value, tilt, d);
+        return format("[tilt 0x%02x %s]", value, getDirection());
     }
 }
