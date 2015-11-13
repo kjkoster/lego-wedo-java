@@ -33,13 +33,6 @@ import org.kjkoster.wedo.usb.Usb;
  * at any time. Re-plugging changes the order and identity of the hubs, even if
  * the system still looks the same to the user. 4) Likewise, WeDo bricks can be
  * plugged in and out or moved at any time.
- * <p>
- * XXX ELABORATE: In a scenario with more than one hub, there is no way to
- * address specifically one motor on one hub.
- * <p>
- * Solution: describe how to work with multiple hubs.
- * <p>
- * 
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
