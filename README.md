@@ -37,7 +37,32 @@ To grant non-root users to access the WeDo devices, create a file named /etc/ude
 ATTRS{idVendor}=="0694", ATTRS{idProduct}=="0003", SUBSYSTEMS=="usb", ACTION=="add", MODE="0666"
 ```
  
-Then unplug the WeDO hubs and plug them back in. Your LEGO WeDo hubs should now be accessible.
+Then unplug the WeDO hubs and plug them back in. Your LEGO WeDo hubs should now be accessible.
+# Brick Addressing
+Addressing bricks is tricky because neither USB nor LEGO WeDo hubs offer any way to uniquely identify an individual brick. WeDo sets come with a single hub and it is pretty obvious that they were designed to have only that one, single hub. This is fine for builds that use only a single hub, of course, but one of the design goals of the lego-wedo-java library is to support multiple hubs.
+
+The lego-wedo-java library passes this problem on to your program by offering only abstract addressing of bricks. So there is no way to specify "the motor on connector A on hub 2". You can only specify "all motors on connectors A of all hubs". lego-wedo-java always iterates over all hubs, trying to find matching bricks on each hub.
+
+Likewise for sensors. When asking for the distance measurement, the API returns a list with a sample of all distance sensors on all hubs. This ensures that your sensors will be read even when a hub us unplugged and plugged back into your computer.
+
+This means that for those who want to build a model with more than two sensors and actuators, some creativity is expected to ensure easy addressing.
+
+Each hub has two connectors, named A and B. Below is a crude ASCII-art picture showing which connector is which.
+
+```
+     |
+(---------)
+| 0 0 0 0 |
+| 0 0 0 0 |
++---------+
+| 0 0 0 0 |
+| (=) (=) |
++---------+
+   A   B
+```
+
+As an aside: The standard software that LEGO supplies for WeDo actually supports up to three hubs. Just hold down the [SHIFT] key when clicking on a motor or lights component. You'll see dots appear over the block that indicate what item is being addressed. Scratch is limited to a single hub, usually the one that was plugged into your computer last.
+
 # Brick Identification
 You may have noticed that in the command line example I used "./wedo reset" to switch off the motor instead of "./wedo motor 0". Go ahead, try it.
 
