@@ -26,8 +26,7 @@ By default, the WeDo hubs get permissions that allow only root to write to the d
 
 ```
 $ ./wedo list
-Nov 12, 2015 9:56:01 AM org.kjkoster.wedo.usb.Usb read
-WARNING: Unable to read product name from 0006:0004:00, permission issue?
+unable to read product name from 0006:0004:00, permission issue?
 No LEGO WeDo hubs found.
 ```
 
