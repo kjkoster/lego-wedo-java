@@ -332,7 +332,7 @@ public class WeDoBricks {
      * @throws IOException
      *             When there was a problem accessing the USB subsystem.
      */
-    public Collection<Distance> distances() throws IOException {
+    public Collection<Distance> readDistances() throws IOException {
         final Collection<Distance> distances = new ArrayList<>();
         for (final Brick[] brick : readAll().values()) {
             if (brick[0].getType() == DISTANCE) {
@@ -352,7 +352,7 @@ public class WeDoBricks {
      * @throws IOException
      *             When there was a problem accessing the USB subsystem.
      */
-    public Collection<Tilt> tilts() throws IOException {
+    public Collection<Tilt> readTilts() throws IOException {
         final Collection<Tilt> tilts = new ArrayList<>();
         for (final Brick[] brick : readAll().values()) {
             if (brick[0].getType() == TILT) {

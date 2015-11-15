@@ -61,7 +61,7 @@ public class HungryAlligator {
         for (;;) {
             sleep(MILLISECONDS.toMillis(100L));
 
-            final Collection<Distance> distances = weDoBricks.distances();
+            final Collection<Distance> distances = weDoBricks.readDistances();
             if (distances.size() > 0 && distances.iterator().next().getCm() < 1) {
                 return;
             }
