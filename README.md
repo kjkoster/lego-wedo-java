@@ -77,7 +77,7 @@ LEGO USB Hub V1.00
   brick B: unknown
 ```
 
-Once a WeDo motor is running, the identification byte changes into a different value. That in itself is not problematic, but there are other bricks too. If you have the lights brick and switch it on, that too gets the same identification byte as a running motor. So once a motor or a light is running, there is no way to tell them apart. Using the verbose mode of the command line utility we can see this behaviour.
+Once a WeDo motor is running, the identification byte changes into a different value. That in itself is not problematic, but there are other bricks too. If you have the lights brick and switch it on, it gets the exact same identification byte as a running motor. So once a motor or a light is running, there is no way to tell them apart. Using the verbose mode of the command line utility we can see this behaviour.
 
 ```
 $ ./wedo -v list
