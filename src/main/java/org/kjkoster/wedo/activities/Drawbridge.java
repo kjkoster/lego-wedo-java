@@ -10,7 +10,6 @@ import static org.kjkoster.wedo.bricks.Tilt.Direction.BACKWARD;
 import static org.kjkoster.wedo.bricks.Tilt.Direction.FORWARD;
 import static org.kjkoster.wedo.bricks.Tilt.Direction.NO_TILT;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Tilt;
@@ -42,13 +41,10 @@ public class Drawbridge {
      * 
      * @param args
      *            Ignored.
-     * @throws IOException
-     *             When there was a problem talking to USB.
      * @throws InterruptedException
      *             Won't happen.
      */
-    public static void main(final String[] args) throws IOException,
-            InterruptedException {
+    public static void main(final String[] args) throws InterruptedException {
         try (final Usb usb = new Usb(false)) {
             weDoBricks = new WeDoBricks(usb, false);
             weDoBricks.reset();
@@ -89,8 +85,7 @@ public class Drawbridge {
      * bridge may either be flat or upright at that point. We run the motor for
      * a brief time and see what happens to the tilt sensor reading.
      */
-    private static void findFlatPoint() throws IOException,
-            InterruptedException {
+    private static void findFlatPoint() throws InterruptedException {
         switch (readTilt()) {
         case BACKWARD:
             out.println("Bridge is still open, closing it first...");
@@ -123,13 +118,13 @@ public class Drawbridge {
         }
     }
 
-    private static Direction readTilt() throws IOException {
+    private static Direction readTilt() {
         final Collection<Tilt> tilts = weDoBricks.readTilts();
         checkState(tilts.size() == 1);
         return tilts.iterator().next().getDirection();
     }
 
-    private static void runUntilFlat() throws IOException, InterruptedException {
+    private static void runUntilFlat() throws InterruptedException {
         Direction direction = readTilt();
         while (direction == BACKWARD || direction == FORWARD) {
             sleep(MILLISECONDS.toMillis(100L));

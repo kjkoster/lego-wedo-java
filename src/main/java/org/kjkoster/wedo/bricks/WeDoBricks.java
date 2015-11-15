@@ -10,7 +10,6 @@ import static org.kjkoster.wedo.bricks.Brick.Type.NOT_CONNECTED;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -74,10 +73,8 @@ public class WeDoBricks {
      * surprise how many bricks we get every time.
      * 
      * @return All the bricks, neatly laid out in a map.
-     * @throws IOException
-     *             When we could not access the USB subsystem.
      */
-    public Map<Handle, Brick[]> readAll() throws IOException {
+    public Map<Handle, Brick[]> readAll() {
         final Map<Handle, Brick[]> bricks = new HashMap<>();
         for (final Map.Entry<Handle, byte[]> packetRead : usb.readFromAll()
                 .entrySet()) {
@@ -163,10 +160,8 @@ public class WeDoBricks {
      * 
      * @param speed
      *            The speed to run the motor at (-127 to 127).
-     * @throws IOException
-     *             When there was a problem accessing the USB subsystem.
      */
-    public void motor(final byte speed) throws IOException {
+    public void motor(final byte speed) {
         actuator(true, true, speed, true, false);
     }
 
@@ -175,10 +170,8 @@ public class WeDoBricks {
      * 
      * @param speed
      *            The speed to run the motor at (-127 to 127).
-     * @throws IOException
-     *             When there was a problem accessing the USB subsystem.
      */
-    public void motorA(final byte speed) throws IOException {
+    public void motorA(final byte speed) {
         actuator(true, false, speed, true, false);
     }
 
@@ -187,34 +180,32 @@ public class WeDoBricks {
      * 
      * @param speed
      *            The speed to run the motor at (-127 to 127).
-     * @throws IOException
-     *             When there was a problem accessing the USB subsystem.
      */
-    public void motorB(final byte speed) throws IOException {
+    public void motorB(final byte speed) {
         actuator(false, true, speed, true, false);
     }
 
-    public void light(final byte intensity) throws IOException {
+    public void light(final byte intensity) {
         actuator(true, true, intensity, false, true);
     }
 
-    public void lightA(final byte intensity) throws IOException {
+    public void lightA(final byte intensity) {
         actuator(true, false, intensity, false, true);
     }
 
-    public void lightB(final byte intensity) throws IOException {
+    public void lightB(final byte intensity) {
         actuator(false, true, intensity, false, true);
     }
 
-    public void all(final byte value) throws IOException {
+    public void all(final byte value) {
         actuator(true, true, value, true, true);
     }
 
-    public void allA(final byte value) throws IOException {
+    public void allA(final byte value) {
         actuator(true, false, value, true, true);
     }
 
-    public void allB(final byte value) throws IOException {
+    public void allB(final byte value) {
         actuator(false, true, value, true, true);
     }
 
@@ -232,8 +223,7 @@ public class WeDoBricks {
      * /com/salaboy/legowedo4j/impl/WedoMotorImpl.java
      */
     private void actuator(final boolean setA, final boolean setB,
-            final byte value, final boolean setMotor, final boolean setLight)
-            throws IOException {
+            final byte value, final boolean setMotor, final boolean setLight) {
         checkArgument(setA || setB);
 
         final Map<Handle, Brick[]> hubs = readAll();
@@ -248,7 +238,7 @@ public class WeDoBricks {
     }
 
     private void actuator(final Brick brick, final byte value,
-            final boolean setMotor, final boolean setLight) throws IOException {
+            final boolean setMotor, final boolean setLight) {
         if (setMotor && brick.getType() == MOTOR) {
             write(brick, value);
         }
@@ -257,8 +247,7 @@ public class WeDoBricks {
         }
     }
 
-    private synchronized void write(final Brick brick, final byte value)
-            throws IOException {
+    private synchronized void write(final Brick brick, final byte value) {
         // read the 'other' value
         final byte otherValue = lookupOtherValue(brick);
         storeNewValue(brick, value);
@@ -313,11 +302,8 @@ public class WeDoBricks {
 
     /**
      * Reset the devices by setting all values to 0.
-     * 
-     * @throws IOException
-     *             When writing to the devices failed.
      */
-    public void reset() throws IOException {
+    public void reset() {
         final Map<Handle, Brick[]> hubs = readAll();
         for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
             write(hub.getValue()[0], (byte) 0x00);
@@ -329,10 +315,8 @@ public class WeDoBricks {
      * Read all distance sensors.
      * 
      * @return The distance values. May be empty, but is never <code>null</code>
-     * @throws IOException
-     *             When there was a problem accessing the USB subsystem.
      */
-    public Collection<Distance> readDistances() throws IOException {
+    public Collection<Distance> readDistances() {
         final Collection<Distance> distances = new ArrayList<>();
         for (final Brick[] brick : readAll().values()) {
             if (brick[0].getType() == DISTANCE) {
@@ -348,11 +332,9 @@ public class WeDoBricks {
     /**
      * Read all tilt sensors.
      * 
-     * @return The tilt values. May be empty, but is never <code>null</code> .
-     * @throws IOException
-     *             When there was a problem accessing the USB subsystem.
+     * @return The tilt values. May be empty, but is never <code>null</code>.
      */
-    public Collection<Tilt> readTilts() throws IOException {
+    public Collection<Tilt> readTilts() {
         final Collection<Tilt> tilts = new ArrayList<>();
         for (final Brick[] brick : readAll().values()) {
             if (brick[0].getType() == TILT) {

@@ -7,6 +7,7 @@ import static java.lang.String.format;
 import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static lombok.Lombok.sneakyThrow;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -45,11 +46,8 @@ public class Usb implements Closeable {
      * 
      * @param verbose
      *            Print a trace of all interaction with the USB port.
-     * @throws IOException
-     *             When there was a problem loading the USB subsystem or the
-     *             native libraries.
      */
-    public Usb(final boolean verbose) throws IOException {
+    public Usb(final boolean verbose) {
         this.verbose = verbose;
 
         synchronized (Usb.class) {
@@ -59,13 +57,18 @@ public class Usb implements Closeable {
                 }
                 hidLibraryLoaded = loadNativeHIDLibrary();
                 if (!hidLibraryLoaded) {
-                    throw new IOException("unable to load native HID library");
+                    throw sneakyThrow(new IOException(
+                            "unable to load native HID library"));
                 }
             }
         }
 
         // just to force it to load.
-        HIDManager.getInstance();
+        try {
+            HIDManager.getInstance();
+        } catch (IOException e) {
+            throw sneakyThrow(e);
+        }
     }
 
     /**
@@ -73,20 +76,22 @@ public class Usb implements Closeable {
      * filter.
      * 
      * @return A map with a data entry for each USB device handle.
-     * @throws IOException
-     *             When there was a problem reading from the USB subsystem.
      */
-    public Map<Handle, byte[]> readFromAll() throws IOException {
-        final Map<Handle, byte[]> packets = new HashMap<>();
-        for (final HIDDeviceInfo hidDeviceInfo : HIDManager.getInstance()
-                .listDevices()) {
-            if (hidDeviceInfo.getVendor_id() == VENDORID_LEGO
-                    && hidDeviceInfo.getProduct_id() == PRODUCTID_WEDOHUB) {
-                read(hidDeviceInfo, packets);
+    public Map<Handle, byte[]> readFromAll() {
+        try {
+            final Map<Handle, byte[]> packets = new HashMap<>();
+            for (final HIDDeviceInfo hidDeviceInfo : HIDManager.getInstance()
+                    .listDevices()) {
+                if (hidDeviceInfo.getVendor_id() == VENDORID_LEGO
+                        && hidDeviceInfo.getProduct_id() == PRODUCTID_WEDOHUB) {
+                    read(hidDeviceInfo, packets);
+                }
             }
-        }
 
-        return packets;
+            return packets;
+        } catch (IOException e) {
+            throw sneakyThrow(e);
+        }
     }
 
     private void read(final HIDDeviceInfo hidDeviceInfo,
@@ -138,11 +143,8 @@ public class Usb implements Closeable {
      *            The USB device handle of the device to write to.
      * @param buffer
      *            The bytes to write.
-     * @throws IOException
-     *             When the write failed.
      */
-    public void write(final Handle handle, final byte[] buffer)
-            throws IOException {
+    public void write(final Handle handle, final byte[] buffer) {
         checkNotNull(handle);
         checkNotNull(buffer);
         checkArgument(buffer.length == 9);
@@ -154,11 +156,15 @@ public class Usb implements Closeable {
                     buffer[4], buffer[5], buffer[6], buffer[7], buffer[8]);
         }
 
-        final int bytesWritten = open(handle).write(buffer);
-        if (bytesWritten != buffer.length) {
-            throw new IOException(format(
-                    "expected to write %d bytes to %s, but wrote %d",
-                    buffer.length, handle, bytesWritten));
+        try {
+            final int bytesWritten = open(handle).write(buffer);
+            if (bytesWritten != buffer.length) {
+                throw new IOException(format(
+                        "expected to write %d bytes to %s, but wrote %d",
+                        buffer.length, handle, bytesWritten));
+            }
+        } catch (IOException e) {
+            throw sneakyThrow(e);
         }
     }
 
@@ -180,10 +186,14 @@ public class Usb implements Closeable {
      * @see java.io.Closeable#close()
      */
     @Override
-    public synchronized void close() throws IOException {
-        for (final HIDDevice hidDevice : openDevices.values()) {
-            hidDevice.close();
+    public synchronized void close() {
+        try {
+            for (final HIDDevice hidDevice : openDevices.values()) {
+                hidDevice.close();
+            }
+            HIDManager.getInstance().release();
+        } catch (IOException e) {
+            throw sneakyThrow(e);
         }
-        HIDManager.getInstance().release();
     }
 }

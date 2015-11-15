@@ -4,7 +4,6 @@ import static java.lang.Byte.parseByte;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -143,7 +142,7 @@ public class WeDo {
      * in which the hubs are reported by the <code>listDevices()</code> method
      * is random (though tantalisingly stable at times).
      */
-    private static void list() throws IOException {
+    private static void list() {
         final Map<Handle, Brick[]> hubs = weDoBricks.readAll();
         if (hubs.size() == 0) {
             out.println("No LEGO WeDo hubs found.");
@@ -176,7 +175,7 @@ public class WeDo {
     }
 
     private static void sensor(int repeat, final boolean showDistance,
-            final boolean showTilt) throws IOException, InterruptedException {
+            final boolean showTilt) throws InterruptedException {
         while (repeat == -1 || repeat > 0) {
             final Map<Handle, Brick[]> hubs = weDoBricks.readAll();
             for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {

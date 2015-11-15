@@ -5,7 +5,6 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.io.IOException;
 import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Distance;
@@ -25,10 +24,8 @@ public class HungryAlligator {
      * 
      * @param args
      *            Ignored.
-     * @throws IOException
-     *             When there was a problem talking to USB.
      */
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         try (final Usb usb = new Usb(false)) {
             weDoBricks = new WeDoBricks(usb, true);
             weDoBricks.reset();
@@ -50,14 +47,13 @@ public class HungryAlligator {
         }
     }
 
-    private static void openJawSlowly() throws IOException,
-            InterruptedException {
+    private static void openJawSlowly() throws InterruptedException {
         weDoBricks.motor((byte) 30);
         sleep(SECONDS.toMillis(3L));
         weDoBricks.motor((byte) 0x00);
     }
 
-    private static void waitForBait() throws IOException, InterruptedException {
+    private static void waitForBait() throws InterruptedException {
         for (;;) {
             sleep(MILLISECONDS.toMillis(100L));
 
@@ -68,7 +64,7 @@ public class HungryAlligator {
         }
     }
 
-    private static void slamShut() throws IOException, InterruptedException {
+    private static void slamShut() throws InterruptedException {
         weDoBricks.motor((byte) -127);
         sleep(MILLISECONDS.toMillis(400L));
         weDoBricks.motor((byte) 0x00);
