@@ -1,5 +1,6 @@
 package org.kjkoster.wedo.activities;
 
+import static java.lang.System.exit;
 import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -39,10 +40,13 @@ public class HungryAlligator {
             }
         } catch (Throwable e) {
             e.printStackTrace();
+            exit(1);
         } finally {
+            weDoBricks.reset();
+
             // It seems that under Mac OS X a thread is still stuck in the
             // hidapi USB library, so we force the JVM to exit.
-            System.exit(0);
+            exit(0);
         }
     }
 

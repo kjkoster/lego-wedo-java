@@ -109,7 +109,7 @@ public class WeDoBricks {
     @SuppressWarnings("cast")
     private Type findType(final Handle handle, final boolean isA, final byte id) {
         Type type;
-        switch (((int) id & 0xff)) {
+        switch ((int) id & 0xff) {
         case 0xe6:
         case 0xe7:
             type = NOT_CONNECTED;
@@ -247,10 +247,6 @@ public class WeDoBricks {
         }
     }
 
-    /**
-     * XXX Switching lights on works, but once the light is on, it is seen as a
-     * motor and we can no longer switch it off as a light.
-     */
     private void actuator(final Brick brick, final byte value,
             final boolean setMotor, final boolean setLight) throws IOException {
         if (setMotor && brick.getType() == MOTOR) {
