@@ -4,16 +4,14 @@ import static com.codeminders.hidapi.ClassPathLibraryLoader.loadNativeHIDLibrary
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static java.lang.System.err;
+import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.logging.Level.FINE;
-import static java.util.logging.Level.WARNING;
-import static java.util.logging.Logger.getLogger;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 import com.codeminders.hidapi.HIDDevice;
 import com.codeminders.hidapi.HIDDeviceInfo;
@@ -34,23 +32,31 @@ public class Usb implements Closeable {
     private static final int VENDORID_LEGO = 0x0694;
     private static final int PRODUCTID_WEDOHUB = 0x0003;
 
-    private static Logger log = getLogger(Usb.class.getName());
+    private static final int PACKETSIZE = 8;
 
     private static volatile boolean hidLibraryLoaded = false;
 
+    private final boolean verbose;
     private final Map<String, HIDDevice> openDevices = new HashMap<>();
 
     /**
      * Initialise a new USB abstraction that filters on a given USB vendor and
      * product ID.
      * 
+     * @param verbose
+     *            Print a trace of all interaction with the USB port.
      * @throws IOException
      *             When there was a problem loading the USB subsystem or the
      *             native libraries.
      */
-    public Usb() throws IOException {
+    public Usb(final boolean verbose) throws IOException {
+        this.verbose = verbose;
+
         synchronized (Usb.class) {
             if (!hidLibraryLoaded) {
+                if (verbose) {
+                    out.println("loading native HID library");
+                }
                 hidLibraryLoaded = loadNativeHIDLibrary();
                 if (!hidLibraryLoaded) {
                     throw new IOException("unable to load native HID library");
@@ -66,68 +72,61 @@ public class Usb implements Closeable {
      * Read a packet from each device that matches our vendor ID and product ID
      * filter.
      * 
-     * @param bytesToRead
-     *            The number of bytes to read.
      * @return A map with a data entry for each USB device handle.
      * @throws IOException
      *             When there was a problem reading from the USB subsystem.
      */
-    public Map<Handle, byte[]> readFromAll(final int bytesToRead)
-            throws IOException {
-        checkArgument(bytesToRead > 0);
-
+    public Map<Handle, byte[]> readFromAll() throws IOException {
         final Map<Handle, byte[]> packets = new HashMap<>();
         for (final HIDDeviceInfo hidDeviceInfo : HIDManager.getInstance()
                 .listDevices()) {
             if (hidDeviceInfo.getVendor_id() == VENDORID_LEGO
                     && hidDeviceInfo.getProduct_id() == PRODUCTID_WEDOHUB) {
-                read(hidDeviceInfo, bytesToRead, packets);
+                read(hidDeviceInfo, packets);
             }
         }
 
         return packets;
     }
 
-    private void read(final HIDDeviceInfo hidDeviceInfo, final int bytesToRead,
+    private void read(final HIDDeviceInfo hidDeviceInfo,
             final Map<Handle, byte[]> packets) {
         try {
             final String productName = hidDeviceInfo.getProduct_string();
             if (productName == null) {
                 // Typically a USB device permissions issue under Linux. If that
                 // is the case, you may need udev rules.
-                log.warning(format(
-                        "Unable to read product name from %s, permission issue?",
-                        hidDeviceInfo.getPath()));
+                err.printf(
+                        "unable to read product name from %s, permission issue?",
+                        hidDeviceInfo.getPath());
                 return;
             }
             final Handle handle = new Handle(hidDeviceInfo.getPath(),
                     productName);
 
-            final byte[] buffer = new byte[bytesToRead];
+            final byte[] buffer = new byte[PACKETSIZE];
             final int bytesRead = open(handle).readTimeout(buffer,
                     (int) MILLISECONDS.toMillis(100L));
-            if (bytesRead != bytesToRead) {
+            if (bytesRead != PACKETSIZE) {
                 // there was a time-out, and we did not get a packet.
-                log.warning(format(
-                        "Expected %d bytes but received %d reading %s, timeout?",
-                        bytesToRead, bytesRead, handle));
+                err.printf(
+                        "expected %d bytes but received %d reading %s, timeout?",
+                        PACKETSIZE, bytesRead, handle);
                 return;
             }
 
-            if (log.isLoggable(FINE)) {
-                String logline = format("read %d bytes from %s:", bytesRead,
-                        handle);
-                for (int i = 0; i < bytesToRead; i++) {
-                    logline += format(" 0x%02x", buffer[i]);
-                }
-                log.fine(logline);
+            if (verbose) {
+                out.printf(
+                        "  USB read %s: 0x%02x 0x%02x [value A: 0x%02x] [id A: 0x%02x] [value B: 0x%02x] [id B: 0x%02x] 0x%02x 0x%02x\n",
+                        handle, buffer[0], buffer[1], buffer[2], buffer[3],
+                        buffer[4], buffer[5], buffer[6], buffer[7]);
             }
 
             packets.put(handle, buffer);
         } catch (IOException e) {
-            log.log(WARNING,
-                    format("unexpected exception reading from %s: %s",
-                            hidDeviceInfo.getPath(), e.getMessage()), e);
+            err.printf("unexpected exception reading from %s: %s",
+                    hidDeviceInfo.getPath(), e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -146,15 +145,13 @@ public class Usb implements Closeable {
             throws IOException {
         checkNotNull(handle);
         checkNotNull(buffer);
-        checkArgument(buffer.length > 0);
+        checkArgument(buffer.length == 9);
 
-        if (log.isLoggable(FINE)) {
-            String logline = format("writing %d bytes to %s:", buffer.length,
-                    handle);
-            for (int i = 0; i < buffer.length; i++) {
-                logline += format(" 0x%02x", buffer[i]);
-            }
-            log.fine(logline);
+        if (verbose) {
+            out.printf(
+                    "  USB write %s: 0x%02x 0x%02x [value A: 0x%02x] [value B: 0x%02x] 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
+                    handle, buffer[0], buffer[1], buffer[2], buffer[3],
+                    buffer[4], buffer[5], buffer[6], buffer[7], buffer[8]);
         }
 
         final int bytesWritten = open(handle).write(buffer);
@@ -170,9 +167,9 @@ public class Usb implements Closeable {
         if (hidDevice == null) {
             hidDevice = HIDManager.getInstance().openByPath(handle.getPath());
             if (hidDevice == null) {
-                log.warning(format(
+                err.printf(
                         "unable to open device %s, claimed by another application?",
-                        handle));
+                        handle);
             }
             openDevices.put(handle.getPath(), hidDevice);
         }

@@ -37,8 +37,6 @@ import org.kjkoster.wedo.usb.Usb;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class WeDoBricks {
-    private static final int PACKETSIZE = 8;
-
     private final Usb usb;
     private final boolean verbose;
 
@@ -81,8 +79,8 @@ public class WeDoBricks {
      */
     public Map<Handle, Brick[]> readAll() throws IOException {
         final Map<Handle, Brick[]> bricks = new HashMap<>();
-        for (final Map.Entry<Handle, byte[]> packetRead : usb.readFromAll(
-                PACKETSIZE).entrySet()) {
+        for (final Map.Entry<Handle, byte[]> packetRead : usb.readFromAll()
+                .entrySet()) {
             bricks.put(packetRead.getKey(),
                     parseBrickAB(packetRead.getKey(), packetRead.getValue()));
         }
@@ -92,19 +90,17 @@ public class WeDoBricks {
     private synchronized Brick[] parseBrickAB(final Handle handle,
             final byte[] buffer) {
         final Brick[] brickAB = new Brick[2];
+
         final Type brickAType = findType(handle, true, buffer[3]);
         brickAB[0] = new Brick(handle, true, brickAType, buffer[3], buffer[2]);
+        if (verbose) {
+            out.println("read " + brickAB[0]);
+        }
+
         final Type brickBType = findType(handle, false, buffer[5]);
         brickAB[1] = new Brick(handle, false, brickBType, buffer[5], buffer[4]);
-
         if (verbose) {
-            out.printf("Read packet from %s.\n", handle);
-            out.printf(
-                    "  raw 0x%02x 0x%02x [value A: 0x%02x] [id A: 0x%02x] [value B: 0x%02x] [id B: 0x%02x] 0x%02x 0x%02x\n",
-                    buffer[0], buffer[1], buffer[2], buffer[3], buffer[4],
-                    buffer[5], buffer[6], buffer[7]);
-            out.printf("  %s\n", brickAB[0]);
-            out.printf("  %s\n", brickAB[1]);
+            out.println("read " + brickAB[1]);
         }
 
         return brickAB;
@@ -271,11 +267,13 @@ public class WeDoBricks {
         final byte otherValue = lookupOtherValue(brick);
         storeNewValue(brick, value);
 
+        final byte valueA = (byte) ((brick.isA() ? value : otherValue) & 0xff);
+        final byte valueB = (byte) ((brick.isA() ? otherValue : value) & 0xff);
         final byte[] buffer = new byte[9];
         buffer[0] = 0;
         buffer[1] = 0x40;
-        buffer[2] = (byte) ((brick.isA() ? value : otherValue) & 0xff);
-        buffer[3] = (byte) ((brick.isA() ? otherValue : value) & 0xff);
+        buffer[2] = valueA;
+        buffer[3] = valueB;
         buffer[4] = 0;
         buffer[5] = 0;
         buffer[6] = 0;
@@ -283,11 +281,8 @@ public class WeDoBricks {
         buffer[8] = 0;
 
         if (verbose) {
-            out.printf("Write command to %s.\n", brick.getHandle());
-            out.printf(
-                    "  raw 0x%02x 0x%02x [value A: 0x%02x] [value B: 0x%02x] 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-                    buffer[0], buffer[1], buffer[2], buffer[3], buffer[4],
-                    buffer[5], buffer[6], buffer[7], buffer[8]);
+            out.printf("write %s -> value A: 0x%02x value B: 0x%02x\n", brick,
+                    valueA, valueB);
         }
 
         usb.write(brick.getHandle(), buffer);

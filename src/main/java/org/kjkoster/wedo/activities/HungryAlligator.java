@@ -24,9 +24,11 @@ public class HungryAlligator {
      * 
      * @param args
      *            Ignored.
+     * @throws IOException
+     *             When there was a problem talking to USB.
      */
-    public static void main(final String[] args) {
-        try (final Usb usb = new Usb()) {
+    public static void main(final String[] args) throws IOException {
+        try (final Usb usb = new Usb(false)) {
             weDoBricks = new WeDoBricks(usb, true);
             weDoBricks.reset();
 

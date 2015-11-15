@@ -3,10 +3,8 @@ package org.kjkoster.wedo;
 import static java.lang.Byte.parseByte;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
-import static java.lang.Thread.setDefaultUncaughtExceptionHandler;
 
 import java.io.IOException;
-import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,30 +31,22 @@ public class WeDo {
      *            The command line arguments, as documented in
      *            <code>usage()</code>.
      */
-    public static void main(String[] args) {
-        setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-            @Override
-            public void uncaughtException(Thread t, Throwable e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
-        });
+    public static void main(final String[] args) {
+        boolean verbose = false;
+        final List<String> options = new ArrayList<>();
+        for (final String arg : args) {
+            options.add(arg);
+        }
+        if (options.size() > 0 && "-v".equals(options.get(0))) {
+            verbose = true;
+            options.remove(0);
+        }
+        if (options.size() == 0) {
+            usage();
+            System.exit(1);
+        }
 
-        try (final Usb usb = new Usb()) {
-            boolean verbose = false;
-            final List<String> options = new ArrayList<>();
-            for (final String arg : args) {
-                options.add(arg);
-            }
-            if (options.size() > 0 && "-v".equals(options.get(0))) {
-                verbose = true;
-                options.remove(0);
-            }
-            if (options.size() == 0) {
-                usage();
-                System.exit(1);
-            }
-
+        try (final Usb usb = new Usb(verbose)) {
             weDoBricks = new WeDoBricks(usb, verbose);
 
             final String command = options.remove(0);
