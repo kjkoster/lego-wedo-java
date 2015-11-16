@@ -45,13 +45,13 @@ public class WeDoBricks {
      * if we just want to set the value for one brick, we still have to write
      * both values.
      */
-    private final HashMap<String, Map<Boolean, Byte>> rememberedActuatorValues = new HashMap<>();
+    private final Map<String, Map<Boolean, Byte>> rememberedActuatorValues = new HashMap<>();
 
     /**
      * We have to remember what type an actuator has. The running motors and
      * lights share ID's, making it impossible to see what is what.
      */
-    private final HashMap<String, Map<Boolean, Type>> rememberedActuatorTypes = new HashMap<>();
+    private final Map<String, Map<Boolean, Type>> rememberedActuatorTypes = new HashMap<>();
 
     /**
      * Create a new WeDo bricks abstraction layer.
@@ -156,43 +156,66 @@ public class WeDoBricks {
     }
 
     /**
-     * Start all motors. This does nothing if no motor was found.
+     * Set all motors to the speed. This does nothing if no motor was found.
      * 
      * @param speed
-     *            The speed to run the motor at (-127 to 127).
+     *            The speed to run the motors at (-127 to 127, 0 is off).
      */
     public void motor(final byte speed) {
         actuator(true, true, speed, true, false);
     }
 
     /**
-     * Start all motors on connector A. This does nothing if no motor was found.
+     * Set all motors on connector A to the specified speed. This does nothing
+     * if no motor was found.
      * 
      * @param speed
-     *            The speed to run the motor at (-127 to 127).
+     *            The speed to run the motors at (-127 to 127, 0 is off).
      */
     public void motorA(final byte speed) {
         actuator(true, false, speed, true, false);
     }
 
     /**
-     * Start all motors on connector B. This does nothing if no motor was found.
+     * Set all motors on connector B to the specified speed. This does nothing
+     * if no motor was found.
      * 
      * @param speed
-     *            The speed to run the motor at (-127 to 127).
+     *            The speed to run the motors at (-127 to 127, 0 is off).
      */
     public void motorB(final byte speed) {
         actuator(false, true, speed, true, false);
     }
 
+    /**
+     * Set all lights to the specified intensity. This does nothing if no light
+     * was found.
+     * 
+     * @param intensity
+     *            The intensity to set the lights to (0 to 127, 0 is off).
+     */
     public void light(final byte intensity) {
         actuator(true, true, intensity, false, true);
     }
 
+    /**
+     * Set all lights on connector A to the specified intensity. This does
+     * nothing if no light was found.
+     * 
+     * @param intensity
+     *            The intensity to set the lights to (0 to 127, 0 is off).
+     */
     public void lightA(final byte intensity) {
         actuator(true, false, intensity, false, true);
     }
 
+    /**
+     * Set all lights on connector B to the specified intensity. This does
+     * nothing if no light was found.
+     * 
+     * @param intensity
+     *            The intensity to set the lights to (0 to 127, 0 is off).
+     */
     public void lightB(final byte intensity) {
         actuator(false, true, intensity, false, true);
     }
