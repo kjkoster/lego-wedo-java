@@ -22,7 +22,7 @@ import org.kjkoster.wedo.usb.Usb;
  * and the WeDo hub. Using only a rather brief tilt sensor we have to decide
  * what angle the drawbridge is at.
  * <p>
- * For the solution below, we make the assumoption that the tilt sensor only
+ * For the solution below, we make the assumption that the tilt sensor only
  * changes a little bit between two readings. We run the motor slowly and use a
  * worm wheel to slow the bridge motion. This gives us time to read the tilt
  * sensor and reason about the angle it must be at.
