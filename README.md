@@ -105,6 +105,30 @@ The programmatic API has a cache that remembers what brick was found on what con
 
 To summarise: when using the **command line utility**, brick identification fails for motors and lights that are on. Use "./wedo reset" to switch them off. The **programmatic API** caches the brick identifier and does not suffer from the same problem.
 
+# Playing Sound Clips
+Playing sound clips are easy from the original LEGO WeDo software and I have to say it adds a lot to the build, silly as it may seem. Adding sound clips proved both more hard and more easy than I thought.
+
+It is hard to add sound clips because of the rights to the various clip files. Obviously I cannot publish the original LEGO WeDo sounds. Making my own sounds is also not very successful (ahem).
+
+On the other hand, playing a sound clip in Java is really easy.
+
+```java
+final File file = new File(fileName);
+if (file.exists()) {
+    final AudioInputStream sound = AudioSystem.getAudioInputStream(file);
+    final Clip clip = AudioSystem.getClip();
+    clip.open(sound);
+    
+    clip.start();
+    clip.drain();
+    clip.stop();
+} else {
+    throw new IOException(file + " does not exist");
+}
+```
+
+That is all. I thought to add it to the WeDoBricks class, but that would just hide the controls for you. So here it is. I'm not adding sound support to this WeDO library, simply because Java already makes that super easy.
+
 # Reference
 This code was written using these projects as a reference:
 - https://github.com/itdaniher/WeDoMore
