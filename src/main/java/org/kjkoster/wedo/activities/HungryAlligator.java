@@ -35,7 +35,7 @@ public class HungryAlligator {
                 waitForBait();
                 slamShut();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             exit(1);
         } finally {

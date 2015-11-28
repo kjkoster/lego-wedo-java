@@ -53,7 +53,7 @@ public class Usb implements Closeable {
         synchronized (Usb.class) {
             if (!hidLibraryLoaded) {
                 if (verbose) {
-                    out.println("loading native HID library");
+                    out.println("  USB loading native HID library");
                 }
                 hidLibraryLoaded = loadNativeHIDLibrary();
                 if (!hidLibraryLoaded) {
@@ -122,7 +122,7 @@ public class Usb implements Closeable {
 
             if (verbose) {
                 out.printf(
-                        "  USB read %s: 0x%02x 0x%02x [value A: 0x%02x] [id A: 0x%02x] [value B: 0x%02x] [id B: 0x%02x] 0x%02x 0x%02x\n",
+                        "  USB read  %s: 0x%02x 0x%02x [value A: 0x%02x] [id A: 0x%02x] [value B: 0x%02x] [id B: 0x%02x] 0x%02x 0x%02x\n",
                         handle, buffer[0], buffer[1], buffer[2], buffer[3],
                         buffer[4], buffer[5], buffer[6], buffer[7]);
             }
