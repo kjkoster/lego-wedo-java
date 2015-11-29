@@ -87,13 +87,13 @@ public class Tilt {
         if (tilt > 60 && tilt < 90) {
             return RIGHT;
         }
-        if (tilt > 120 && tilt < 140) {
+        if (tilt > 117 && tilt < 140) {
             return NO_TILT;
         }
-        if (tilt > 170 && tilt < 190) {
+        if (tilt > 151 && tilt < 190) {
             return FORWARD;
         }
-        if (tilt > 220 && tilt < 240) {
+        if (tilt > 203 && tilt < 240) {
             return LEFT;
         }
         throw new IllegalArgumentException(format("unknown tilt value 0x%02x",
