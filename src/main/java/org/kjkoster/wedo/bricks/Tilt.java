@@ -77,6 +77,10 @@ public class Tilt {
      */
     public Direction getDirection() {
         final int tilt = (value & 0xff);
+        if (tilt < 4) {
+            throw new IllegalStateException(format(
+                    "motor interference on tilt sensor (value 0x%02x)", value));
+        }
         if (tilt > 10 && tilt < 40) {
             return BACKWARD;
         }
