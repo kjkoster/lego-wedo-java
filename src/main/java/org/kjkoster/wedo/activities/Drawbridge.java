@@ -41,10 +41,8 @@ public class Drawbridge {
      * 
      * @param args
      *            Ignored.
-     * @throws InterruptedException
-     *             Won't happen.
      */
-    public static void main(final String[] args) throws InterruptedException {
+    public static void main(final String[] args) {
         try (final Usb usb = new Usb(false)) {
             weDoBricks = new WeDoBricks(usb, false);
             weDoBricks.reset();
@@ -64,7 +62,7 @@ public class Drawbridge {
                 sleep(SECONDS.toMillis(2L));
                 runUntilFlat();
             }
-        } catch (Throwable e) {
+        } catch (Exception e) {
             e.printStackTrace();
             exit(1);
         } finally {
