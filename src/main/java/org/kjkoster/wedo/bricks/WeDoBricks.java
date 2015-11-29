@@ -91,13 +91,13 @@ public class WeDoBricks {
         final Type brickAType = findType(handle, true, buffer[3]);
         brickAB[0] = new Brick(handle, true, brickAType, buffer[3], buffer[2]);
         if (verbose) {
-            out.println("read " + brickAB[0]);
+            out.println("read  " + brickAB[0]);
         }
 
         final Type brickBType = findType(handle, false, buffer[5]);
         brickAB[1] = new Brick(handle, false, brickBType, buffer[5], buffer[4]);
         if (verbose) {
-            out.println("read " + brickAB[1]);
+            out.println("read  " + brickAB[1]);
         }
 
         return brickAB;
@@ -278,15 +278,15 @@ public class WeDoBricks {
         final byte valueA = (byte) ((brick.isA() ? value : otherValue) & 0xff);
         final byte valueB = (byte) ((brick.isA() ? otherValue : value) & 0xff);
         final byte[] buffer = new byte[9];
-        buffer[0] = 0;
+        buffer[0] = 0x00;
         buffer[1] = 0x40;
         buffer[2] = valueA;
         buffer[3] = valueB;
-        buffer[4] = 0;
-        buffer[5] = 0;
-        buffer[6] = 0;
-        buffer[7] = 0;
-        buffer[8] = 0;
+        buffer[4] = 0x00;
+        buffer[5] = 0x00;
+        buffer[6] = 0x00;
+        buffer[7] = 0x00;
+        buffer[8] = 0x00;
 
         if (verbose) {
             out.printf("write %s -> value A: 0x%02x value B: 0x%02x\n", brick,
