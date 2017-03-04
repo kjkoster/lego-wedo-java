@@ -910,7 +910,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_read(int handle, int offset, int result,
             byte[] value) {
         out.printf(
-                "ATT: receive_attributes_read(handle: 0x%02x, offset: %d, result: [0x%04x %s])\n",
+                "ATT: receive_attributes_read(handle: 0x%04x, offset: %d, result: [0x%04x %s])\n",
                 handle, offset, result, reasonOrResult(result));
         out.println(hexDump("value", value));
     }
@@ -923,7 +923,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_read_type(int handle, int result,
             byte[] value) {
         out.printf(
-                "ATT: receive_attributes_read_type(handle: 0x%02x, result: [0x%04x %s])\n",
+                "ATT: receive_attributes_read_type(handle: 0x%04x, result: [0x%04x %s])\n",
                 handle, result, reasonOrResult(result));
         out.println(hexDump("value", value));
     }
@@ -944,7 +944,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_value(int connection, int reason, int handle,
             int offset, byte[] value) {
         out.printf(
-                "ATT: receive_attributes_value(connection: %d, reason: [0x%04x %s], handle: 0x%02x, offset: %d)\n",
+                "ATT: receive_attributes_value(connection: %d, reason: [0x%04x %s], handle: 0x%04x, offset: %d)\n",
                 connection, reason, reasonOrResult(reason), handle, offset);
         out.println(hexDump("value", value));
     }
@@ -957,7 +957,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_user_request(int connection, int handle,
             int offset) {
         out.printf(
-                "ATT: receive_attributes_user_request(connection: %d, handle: 0x%02x, offset: %d)\n",
+                "ATT: receive_attributes_user_request(connection: %d, handle: 0x%04x, offset: %d)\n",
                 connection, handle, offset);
     }
 
@@ -1254,7 +1254,7 @@ public class ProtocolLogger implements BGAPIListener {
     @Override
     public void receive_attclient_indicated(int connection, int attrhandle) {
         out.printf(
-                "ATTCLIENT: receive_attclient_indicated(connection: %d, attrhandle: 0x%02x)\n",
+                "ATTCLIENT: receive_attclient_indicated(connection: %d, attrhandle: 0x%04x)\n",
                 connection, attrhandle);
     }
 
@@ -1266,7 +1266,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_procedure_completed(int connection,
             int result, int chrhandle) {
         out.printf(
-                "ATTCLIENT: receive_attclient_procedure_completed(connection: %d, result: [0x%04x %s], chrhandle: 0x%02x)\n",
+                "ATTCLIENT: receive_attclient_procedure_completed(connection: %d, result: [0x%04x %s], chrhandle: 0x%04x)\n",
                 connection, result, reasonOrResult(result), chrhandle);
     }
 
@@ -1302,7 +1302,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_find_information_found(int connection,
             int chrhandle, byte[] uuid) {
         out.printf(
-                "ATTCLIENT: receive_attclient_find_information_found(connection: %d, chrhandle: 0x%02x, uuid: %s)\n",
+                "ATTCLIENT: receive_attclient_find_information_found(connection: %d, chrhandle: 0x%04x, uuid: %s)\n",
                 connection, chrhandle, uuid(uuid));
     }
 
@@ -1314,7 +1314,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_attribute_value(int connection, int atthandle,
             int type, byte[] value) {
         out.printf(
-                "ATTCLIENT: receive_attclient_attribute_value(connection: %d, atthandle: 0x%02x, type: %d)\n",
+                "ATTCLIENT: receive_attclient_attribute_value(connection: %d, atthandle: 0x%04x, type: %d)\n",
                 connection, atthandle, type);
         out.println(hexDump("value", value));
     }
@@ -1706,7 +1706,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_hardware_soft_timer(int handle) {
-        out.printf("HARDWARE: receive_hardware_soft_timer(handle: 0x%02x)\n",
+        out.printf("HARDWARE: receive_hardware_soft_timer(handle: 0x%04x)\n",
                 handle);
     }
 
