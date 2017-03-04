@@ -6,6 +6,7 @@ import static java.lang.System.out;
 import static org.apache.commons.cli.Option.builder;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Map;
 
 import org.apache.commons.cli.CommandLine;
@@ -19,7 +20,6 @@ import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.bricks.WeDoBricks;
 import org.kjkoster.wedo.sbrick.SBrickScanner;
-import org.kjkoster.wedo.sbrick.SBricks;
 import org.kjkoster.wedo.usb.Handle;
 import org.kjkoster.wedo.usb.Usb;
 
@@ -30,6 +30,7 @@ import org.kjkoster.wedo.usb.Usb;
  */
 public class WeDo {
     private static final String VERBOSE = "v";
+    private static final String BLE112DEVICE = "ble112";
 
     private static final String RESET = "reset";
     private static final String LIST = "list";
@@ -52,10 +53,6 @@ public class WeDo {
 
     private static WeDoBricks weDoBricks = null;
 
-    // XXX magic string
-    private static final File ble112Device = new File("/dev/cu.usbmodem1");
-    private static SBricks sBricks = null;
-
     /**
      * The main application entry point.
      * 
@@ -63,7 +60,7 @@ public class WeDo {
      *            The command line arguments, as documented in
      *            <code>usage()</code>.
      * @throws ParseException
-     *             XXX
+     *             When the command line could not be parsed.
      */
     public static void main(final String[] args) throws ParseException {
         final Options options = setOptions();
@@ -71,17 +68,16 @@ public class WeDo {
         final CommandLine commandLine = parseCommandLine(options, args);
 
         final boolean verbose = commandLine.hasOption(VERBOSE);
+        final File ble112Device = commandLine.hasOption(BLE112DEVICE)
+                ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
-        try (final Usb usb = new Usb(verbose);
-                final SBrickScanner sBrickScanner = new SBrickScanner(
-                        ble112Device, verbose)) {
+        try (final Usb usb = new Usb(verbose)) {
             weDoBricks = new WeDoBricks(usb, verbose);
-            sBricks = new SBricks(sBrickScanner);
 
             if (commandLine.hasOption(RESET)) {
                 weDoBricks.reset();
             } else if (commandLine.hasOption(LIST)) {
-                list();
+                list(ble112Device, verbose);
             } else if (commandLine.hasOption(SENSOR)) {
                 final String value = commandLine.getOptionValue(SENSOR);
                 sensor(value == null ? -1 : parseInt(value), true, true);
@@ -133,6 +129,8 @@ public class WeDo {
         final Options options = new Options();
 
         options.addOption(VERBOSE, "verbose output");
+        options.addOption(BLE112DEVICE, true,
+                "the file path to your BLE112 dongle. On Mac OS X, this is typically /dev/cu.usbmodem1");
 
         options.addOption(RESET, "reset all bricks");
         options.addOption(LIST, "list WeDo hubs, SBricks and SBrick Pluses");
@@ -182,7 +180,8 @@ public class WeDo {
      * in which the hubs are reported by the <code>listDevices()</code> method
      * is random (though tantalisingly stable at times).
      */
-    private static void list() {
+    private static void list(final File ble112Device, final boolean verbose)
+            throws IOException {
         out.printf("Scanning for LEGO WeDo hubs...\n\n");
 
         Map<Handle, Brick[]> hubs = weDoBricks.readAll();
@@ -198,18 +197,28 @@ public class WeDo {
             }
         }
 
-        out.printf(
-                "\nScanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
-
-        hubs = sBricks.readAll();
-        if (hubs.size() == 0) {
-            out.println("No Vengit SBricks or SBrick Pluses found.");
+        if (ble112Device == null) {
+            out.printf(
+                    "\nSpecify -%s on the command line to look for Vengit SBricks too.\n",
+                    BLE112DEVICE);
         } else {
-            for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
-                out.println(hub.getKey().getProductName() + ", at "
-                        + hub.getKey().getPath());
-                for (final Brick brick : hub.getValue()) {
-                    listBrick(brick);
+            out.printf(
+                    "\nScanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
+
+            try (final SBrickScanner sBrickScanner = new SBrickScanner(
+                    ble112Device, verbose)) {
+                hubs = sBrickScanner.readAll();
+                if (hubs.size() == 0) {
+                    out.println("No Vengit SBricks or SBrick Pluses found.");
+                } else {
+                    for (final Map.Entry<Handle, Brick[]> hub : hubs
+                            .entrySet()) {
+                        out.println(hub.getKey().getProductName() + ", at "
+                                + hub.getKey().getPath());
+                        for (final Brick brick : hub.getValue()) {
+                            listBrick(brick);
+                        }
+                    }
                 }
             }
         }
