@@ -35,6 +35,14 @@
 		</dependency>
 	</dependencies>
 
+	<repositories>
+		<repository>
+			<id>thingml-snapshot</id>
+			<name>thingml-snapshot</name>
+			<url>http://maven.thingml.org/thingml-snapshot/</url>
+		</repository>
+	</repositories>
+
 	<build>
 		<plugins>
 			<plugin>
