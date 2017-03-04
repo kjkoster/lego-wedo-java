@@ -3,12 +3,17 @@ package org.kjkoster.wedo;
 import static java.lang.Byte.parseByte;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
+import static org.apache.commons.cli.Option.builder;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
@@ -24,6 +29,27 @@ import org.kjkoster.wedo.usb.Usb;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class WeDo {
+    private static final String VERBOSE = "v";
+
+    private static final String RESET = "reset";
+    private static final String LIST = "list";
+
+    private static final String TILT = "tilt";
+    private static final String DISTANCE = "distance";
+    private static final String SENSOR = "sensor";
+
+    private static final String ALL = "all";
+    private static final String ALL_A = "allA";
+    private static final String ALL_B = "allB";
+
+    private static final String LIGHT = "light";
+    private static final String LIGHT_A = "lightA";
+    private static final String LIGHT_B = "lightB";
+
+    private static final String MOTOR = "motor";
+    private static final String MOTOR_A = "motorA";
+    private static final String MOTOR_B = "motorB";
+
     private static WeDoBricks weDoBricks = null;
 
     // XXX magic string
@@ -36,21 +62,15 @@ public class WeDo {
      * @param args
      *            The command line arguments, as documented in
      *            <code>usage()</code>.
+     * @throws ParseException
+     *             XXX
      */
-    public static void main(final String[] args) {
-        boolean verbose = false;
-        final List<String> options = new ArrayList<>();
-        for (final String arg : args) {
-            options.add(arg);
-        }
-        if (options.size() > 0 && "-v".equals(options.get(0))) {
-            verbose = true;
-            options.remove(0);
-        }
-        if (options.size() == 0) {
-            usage();
-            System.exit(1);
-        }
+    public static void main(final String[] args) throws ParseException {
+        final Options options = setOptions();
+
+        final CommandLine commandLine = parseCommandLine(options, args);
+
+        final boolean verbose = commandLine.hasOption(VERBOSE);
 
         try (final Usb usb = new Usb(verbose);
                 final SBrickScanner sBrickScanner = new SBrickScanner(
@@ -58,64 +78,49 @@ public class WeDo {
             weDoBricks = new WeDoBricks(usb, verbose);
             sBricks = new SBricks(sBrickScanner);
 
-            final String command = options.remove(0);
-            switch (command) {
-            case "reset":
+            if (commandLine.hasOption(RESET)) {
                 weDoBricks.reset();
-                break;
-            case "list":
+            } else if (commandLine.hasOption(LIST)) {
                 list();
-                break;
-
-            case "sensor":
-                sensor(options.size() == 0 ? -1 : parseInt(options.remove(0)),
-                        true, true);
-                break;
-            case "distance":
-                sensor(options.size() == 0 ? -1 : parseInt(options.remove(0)),
-                        true, false);
-                break;
-            case "tilt":
-                sensor(options.size() == 0 ? -1 : parseInt(options.remove(0)),
-                        false, true);
-                break;
-
-            case "motor":
-                weDoBricks.motor(parseByte(options.remove(0)));
-                break;
-            case "motorA":
-                weDoBricks.motorA(parseByte(options.remove(0)));
-                break;
-            case "motorB":
-                weDoBricks.motorB(parseByte(options.remove(0)));
-                break;
-
-            case "light":
-                weDoBricks.light(parseByte(options.remove(0)));
-                break;
-            case "lightA":
-                weDoBricks.lightA(parseByte(options.remove(0)));
-                break;
-            case "lightB":
-                weDoBricks.lightB(parseByte(options.remove(0)));
-                break;
-
-            case "all":
-                weDoBricks.all(parseByte(options.remove(0)));
-                break;
-            case "allA":
-                weDoBricks.allA(parseByte(options.remove(0)));
-                break;
-            case "allB":
-                weDoBricks.allB(parseByte(options.remove(0)));
-                break;
-
-            default:
-                out.printf("unknown command '%s'\n", command);
-                usage();
+            } else if (commandLine.hasOption(SENSOR)) {
+                final String value = commandLine.getOptionValue(SENSOR);
+                sensor(value == null ? -1 : parseInt(value), true, true);
+            } else if (commandLine.hasOption(DISTANCE)) {
+                final String value = commandLine.getOptionValue(DISTANCE);
+                sensor(value == null ? -1 : parseInt(value), true, false);
+            } else if (commandLine.hasOption(TILT)) {
+                final String value = commandLine.getOptionValue(TILT);
+                sensor(value == null ? -1 : parseInt(value), false, true);
+            } else if (commandLine.hasOption(MOTOR)) {
+                weDoBricks.motor(parseByte(commandLine.getOptionValue(MOTOR)));
+            } else if (commandLine.hasOption(MOTOR_A)) {
+                weDoBricks
+                        .motorA(parseByte(commandLine.getOptionValue(MOTOR_A)));
+            } else if (commandLine.hasOption(MOTOR_B)) {
+                weDoBricks
+                        .motorB(parseByte(commandLine.getOptionValue(MOTOR_B)));
+            } else if (commandLine.hasOption(LIGHT)) {
+                weDoBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
+            } else if (commandLine.hasOption(LIGHT_A)) {
+                weDoBricks
+                        .lightA(parseByte(commandLine.getOptionValue(LIGHT_A)));
+            } else if (commandLine.hasOption(LIGHT_B)) {
+                weDoBricks
+                        .lightB(parseByte(commandLine.getOptionValue(LIGHT_B)));
+            } else if (commandLine.hasOption(ALL)) {
+                weDoBricks.all(parseByte(commandLine.getOptionValue(ALL)));
+            } else if (commandLine.hasOption(ALL_A)) {
+                weDoBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
+            } else if (commandLine.hasOption(ALL_B)) {
+                weDoBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
+            } else {
+                final HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("wedo", options);
                 System.exit(1);
             }
-        } catch (Throwable e) {
+        } catch (
+
+        Throwable e) {
             e.printStackTrace();
         } finally {
             // It seems that under Mac OS X a thread is still stuck in the
@@ -124,42 +129,54 @@ public class WeDo {
         }
     }
 
-    private static void usage() {
-        out.println("Usage:");
-        out.println("    wedo [-v] reset               reset all bricks");
-        out.println(
-                "    wedo [-v] list                list WeDo hubs and blocks");
-        out.println(
-                "    wedo [-v] sensor [<n>]        read all sensors n times (default repeat forever)");
-        out.println(
-                "    wedo [-v] distance [<n>]      read all distance sensors n times (default repeat forever)");
-        out.println(
-                "    wedo [-v] tilt [<n>]          read all tilt sensors n times (default repeat forever)");
-        out.println(
-                "    wedo [-v] motor <speed>       set all motors to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println(
-                "    wedo [-v] motorA <speed>      set all motor A's to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println(
-                "    wedo [-v] motorB <speed>      set all motor B's to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println(
-                "    wedo [-v] light <intensity>   set all lights to intensity (0 to 127, 0 is off)");
-        out.println(
-                "    wedo [-v] lightA <intensity>  set all block A lights to intensity (0 to 127, 0 is off)");
-        out.println(
-                "    wedo [-v] lightB <intensity>  set all block B lights to intensity (0 to 127, 0 is off)");
-        out.println(
-                "    wedo [-v] all <value>         set all blocks to value (-127 to 127)");
-        out.println(
-                "    wedo [-v] allA <value>        set all block A's to speed (-127 to 127)");
-        out.println(
-                "    wedo [-v] allB <value>        set all block B's to speed (-127 to 127)");
+    private static Options setOptions() {
+        final Options options = new Options();
+
+        options.addOption(VERBOSE, "verbose output");
+
+        options.addOption(RESET, "reset all bricks");
+        options.addOption(LIST, "list WeDo hubs, SBricks and SBrick Pluses");
+        options.addOption(builder(SENSOR).optionalArg(true)
+                .desc("read all sensors [<n>] times (default repeat forever)")
+                .build());
+        options.addOption(builder(DISTANCE).optionalArg(true)
+                .desc("read all distance sensors [<n>] times (default repeat forever)")
+                .build());
+        options.addOption(builder(TILT).optionalArg(true)
+                .desc("read all tilt sensors [<n>] times (default repeat forever)")
+                .build());
+        options.addOption(MOTOR, true,
+                "set all motors to speed (-127 to 127, 0 is off, negative for reverse)");
+        options.addOption(MOTOR_A, true,
+                "set all motor A's to speed (-127 to 127, 0 is off, negative for reverse)");
+        options.addOption(MOTOR_B, true,
+                "set all motor B's to speed (-127 to 127, 0 is off, negative for reverse)");
+        options.addOption(LIGHT, true,
+                "set all lights to intensity (0 to 127, 0 is off)");
+        options.addOption(LIGHT_A, true,
+                "set all brick A lights to intensity (0 to 127, 0 is off)");
+        options.addOption(LIGHT_B, true,
+                "set all brick B lights to intensity (0 to 127, 0 is off)");
+        options.addOption(ALL, true, "set all bricks to value (-127 to 127)");
+        options.addOption(ALL_A, true,
+                "set all brick A's to speed (-127 to 127)");
+        options.addOption(ALL_B, true,
+                "set all brick B's to speed (-127 to 127)");
+
+        return options;
+    }
+
+    private static CommandLine parseCommandLine(final Options options,
+            final String[] arguments) throws ParseException {
+        final CommandLineParser commandLineParser = new DefaultParser();
+        return commandLineParser.parse(options, arguments);
     }
 
     /**
      * Print information on the WeDo hubs attached to this computer, and the
      * devices connected to them. The list is unordered.
      * <p>
-     * We have no reliable way of addressing specific blocks connected to a
+     * We have no reliable way of addressing specific bricks connected to a
      * specific hub. If you study the output of the verbose you will find that
      * WeDo hubs do not seem to have identifying information. Further, the order
      * in which the hubs are reported by the <code>listDevices()</code> method
@@ -181,7 +198,8 @@ public class WeDo {
             }
         }
 
-        out.printf("\nScanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
+        out.printf(
+                "\nScanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
         hubs = sBricks.readAll();
         if (hubs.size() == 0) {

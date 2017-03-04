@@ -237,7 +237,7 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
                 // newer firmware
                 out.printf(
                         "Found an SBrick that has an older, unsupported firmware version. Use the\n"
-                                + "official SBrick app to update its firmware first and then re-run \"wedo list\".\n\n");
+                                + "official SBrick app to update its firmware first and then re-run \"wedo -list\".\n\n");
                 bgapi.send_connection_disconnect(connection);
             }
             bgapi.send_attclient_read_by_handle(connection, HANDLE_NAME);
