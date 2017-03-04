@@ -1278,7 +1278,7 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_group_found(int connection, int start,
             int end, byte[] uuid) {
         out.printf(
-                "ATTCLIENT: receive_attclient_group_found(connection: %d, start: %d, end %d, uuid: %s)\n",
+                "ATTCLIENT: receive_attclient_group_found(connection: %d, start: 0x%04x, end 0x%04x, uuid: %s)\n",
                 connection, start, end, uuid(uuid));
     }
 
