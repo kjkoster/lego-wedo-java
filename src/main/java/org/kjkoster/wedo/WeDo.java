@@ -4,6 +4,7 @@ import static java.lang.Byte.parseByte;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,8 @@ import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.bricks.WeDoBricks;
+import org.kjkoster.wedo.sbrick.SBrickScanner;
+import org.kjkoster.wedo.sbrick.SBricks;
 import org.kjkoster.wedo.usb.Handle;
 import org.kjkoster.wedo.usb.Usb;
 
@@ -22,6 +25,10 @@ import org.kjkoster.wedo.usb.Usb;
  */
 public class WeDo {
     private static WeDoBricks weDoBricks = null;
+
+    // XXX magic string
+    private static final File ble112Device = new File("/dev/cu.usbmodem1");
+    private static SBricks sBricks = null;
 
     /**
      * The main application entry point.
@@ -45,8 +52,11 @@ public class WeDo {
             System.exit(1);
         }
 
-        try (final Usb usb = new Usb(verbose)) {
+        try (final Usb usb = new Usb(verbose);
+                final SBrickScanner sBrickScanner = new SBrickScanner(
+                        ble112Device, verbose)) {
             weDoBricks = new WeDoBricks(usb, verbose);
+            sBricks = new SBricks(sBrickScanner);
 
             final String command = options.remove(0);
             switch (command) {
@@ -117,19 +127,32 @@ public class WeDo {
     private static void usage() {
         out.println("Usage:");
         out.println("    wedo [-v] reset               reset all bricks");
-        out.println("    wedo [-v] list                list WeDo hubs and blocks");
-        out.println("    wedo [-v] sensor [<n>]        read all sensors n times (default repeat forever)");
-        out.println("    wedo [-v] distance [<n>]      read all distance sensors n times (default repeat forever)");
-        out.println("    wedo [-v] tilt [<n>]          read all tilt sensors n times (default repeat forever)");
-        out.println("    wedo [-v] motor <speed>       set all motors to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println("    wedo [-v] motorA <speed>      set all motor A's to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println("    wedo [-v] motorB <speed>      set all motor B's to speed (-127 to 127, 0 is off, negative for reverse)");
-        out.println("    wedo [-v] light <intensity>   set all lights to intensity (0 to 127, 0 is off)");
-        out.println("    wedo [-v] lightA <intensity>  set all block A lights to intensity (0 to 127, 0 is off)");
-        out.println("    wedo [-v] lightB <intensity>  set all block B lights to intensity (0 to 127, 0 is off)");
-        out.println("    wedo [-v] all <value>         set all blocks to value (-127 to 127)");
-        out.println("    wedo [-v] allA <value>        set all block A's to speed (-127 to 127)");
-        out.println("    wedo [-v] allB <value>        set all block B's to speed (-127 to 127)");
+        out.println(
+                "    wedo [-v] list                list WeDo hubs and blocks");
+        out.println(
+                "    wedo [-v] sensor [<n>]        read all sensors n times (default repeat forever)");
+        out.println(
+                "    wedo [-v] distance [<n>]      read all distance sensors n times (default repeat forever)");
+        out.println(
+                "    wedo [-v] tilt [<n>]          read all tilt sensors n times (default repeat forever)");
+        out.println(
+                "    wedo [-v] motor <speed>       set all motors to speed (-127 to 127, 0 is off, negative for reverse)");
+        out.println(
+                "    wedo [-v] motorA <speed>      set all motor A's to speed (-127 to 127, 0 is off, negative for reverse)");
+        out.println(
+                "    wedo [-v] motorB <speed>      set all motor B's to speed (-127 to 127, 0 is off, negative for reverse)");
+        out.println(
+                "    wedo [-v] light <intensity>   set all lights to intensity (0 to 127, 0 is off)");
+        out.println(
+                "    wedo [-v] lightA <intensity>  set all block A lights to intensity (0 to 127, 0 is off)");
+        out.println(
+                "    wedo [-v] lightB <intensity>  set all block B lights to intensity (0 to 127, 0 is off)");
+        out.println(
+                "    wedo [-v] all <value>         set all blocks to value (-127 to 127)");
+        out.println(
+                "    wedo [-v] allA <value>        set all block A's to speed (-127 to 127)");
+        out.println(
+                "    wedo [-v] allB <value>        set all block B's to speed (-127 to 127)");
     }
 
     /**
@@ -143,33 +166,50 @@ public class WeDo {
      * is random (though tantalisingly stable at times).
      */
     private static void list() {
-        final Map<Handle, Brick[]> hubs = weDoBricks.readAll();
+        out.printf("Scanning for LEGO WeDo hubs...\n\n");
+
+        Map<Handle, Brick[]> hubs = weDoBricks.readAll();
         if (hubs.size() == 0) {
             out.println("No LEGO WeDo hubs found.");
         } else {
             for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
-
+                // we don't show the USB address, it changes a lot.
                 out.println(hub.getKey().getProductName());
-                listBrick(true, hub.getValue()[0]);
-                listBrick(false, hub.getValue()[1]);
+                for (final Brick brick : hub.getValue()) {
+                    listBrick(brick);
+                }
+            }
+        }
+
+        out.printf("\nScanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
+
+        hubs = sBricks.readAll();
+        if (hubs.size() == 0) {
+            out.println("No Vengit SBricks or SBrick Pluses found.");
+        } else {
+            for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+                out.println(hub.getKey().getProductName() + ", at "
+                        + hub.getKey().getPath());
+                for (final Brick brick : hub.getValue()) {
+                    listBrick(brick);
+                }
             }
         }
     }
 
-    private static void listBrick(final boolean isA, final Brick brick) {
+    private static void listBrick(final Brick brick) {
         String sensorData = "";
         switch (brick.getType()) {
         case DISTANCE:
             sensorData = ": " + brick.getDistance().getCm() + " cm";
             break;
         case TILT:
-            sensorData = ": "
-                    + brick.getTilt().getDirection().toString().toLowerCase()
-                            .replace("_", " ");
+            sensorData = ": " + brick.getTilt().getDirection().toString()
+                    .toLowerCase().replace("_", " ");
             break;
         default:
         }
-        out.println("  brick " + (isA ? "A" : "B") + ": "
+        out.println("  brick " + brick.getPort() + ": "
                 + brick.getType().toString().toLowerCase().replace("_", " ")
                 + sensorData);
     }
@@ -191,9 +231,10 @@ public class WeDo {
                     case TILT:
                         if (showTilt) {
                             final Tilt tilt = brick.getTilt();
-                            out.printf("tilt %s (value %d)\n", tilt
-                                    .getDirection().toString().toLowerCase()
-                                    .replace("_", " "), tilt.getValue());
+                            out.printf("tilt %s (value %d)\n",
+                                    tilt.getDirection().toString().toLowerCase()
+                                            .replace("_", " "),
+                                    tilt.getValue());
                         }
                         break;
                     case MOTOR:

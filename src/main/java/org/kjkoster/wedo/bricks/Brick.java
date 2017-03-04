@@ -1,5 +1,6 @@
 package org.kjkoster.wedo.bricks;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
@@ -17,7 +18,7 @@ import org.kjkoster.wedo.usb.Handle;
  */
 public class Brick {
     private final Handle handle;
-    private final boolean isA;
+    private final char port;
 
     private final byte id;
     private final Type type;
@@ -30,9 +31,9 @@ public class Brick {
      * @param handle
      *            The USB device handle of the device that this brick is
      *            connected to.
-     * @param isA
-     *            <code>true</code> if this is on connector A of the WeDo hub,
-     *            or <code>false</code>if this comes from connector B.
+     * @param port
+     *            The capital letter designating the port on the hub that this
+     *            brick is connected to.
      * @param type
      *            The type of brick.
      * @param id
@@ -40,10 +41,11 @@ public class Brick {
      * @param value
      *            The value of the value byte that was read from the WeDo hub.
      */
-    public Brick(final Handle handle, final boolean isA, final Type type,
+    public Brick(final Handle handle, final char port, final Type type,
             final byte id, final byte value) {
         this.handle = checkNotNull(handle);
-        this.isA = isA;
+        checkArgument(port >= 'A' && port <= 'Z', "invalid port %c", port);
+        this.port = port;
         this.type = checkNotNull(type);
         this.id = id;
         this.value = value;
@@ -53,8 +55,13 @@ public class Brick {
         return handle;
     }
 
-    boolean isA() {
-        return isA;
+    /**
+     * Find what port this brick is connected to.
+     * 
+     * @return The port that this brick is connected to, as a capital letter.
+     */
+    public char getPort() {
+        return port;
     }
 
     /**
@@ -141,7 +148,7 @@ public class Brick {
             sensorData = "";
         }
 
-        return format("[%s brick %s: %s id: 0x%02x value: 0x%02x%s]", handle,
-                (isA ? "A" : "B"), type, id, value, sensorData);
+        return format("[%s brick %c: %s id: 0x%02x value: 0x%02x%s]", handle,
+                port, type, id, value, sensorData);
     }
 }

@@ -14,7 +14,7 @@ public class Handle {
     private final String path;
     private final String productName;
 
-    Handle(final String path, final String productName) {
+    public Handle(final String path, final String productName) {
         this.path = checkNotNull(path);
         this.productName = checkNotNull(productName);
     }

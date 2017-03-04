@@ -45,13 +45,13 @@ public class WeDoBricks {
      * if we just want to set the value for one brick, we still have to write
      * both values.
      */
-    private final Map<String, Map<Boolean, Byte>> rememberedActuatorValues = new HashMap<>();
+    private final Map<String, Map<Character, Byte>> rememberedActuatorValues = new HashMap<>();
 
     /**
      * We have to remember what type an actuator has. The running motors and
      * lights share ID's, making it impossible to see what is what.
      */
-    private final Map<String, Map<Boolean, Type>> rememberedActuatorTypes = new HashMap<>();
+    private final Map<String, Map<Character, Type>> rememberedActuatorTypes = new HashMap<>();
 
     /**
      * Create a new WeDo bricks abstraction layer.
@@ -88,14 +88,14 @@ public class WeDoBricks {
             final byte[] buffer) {
         final Brick[] brickAB = new Brick[2];
 
-        final Type brickAType = findType(handle, true, buffer[3]);
-        brickAB[0] = new Brick(handle, true, brickAType, buffer[3], buffer[2]);
+        final Type brickAType = findType(handle, 'A', buffer[3]);
+        brickAB[0] = new Brick(handle, 'A', brickAType, buffer[3], buffer[2]);
         if (verbose) {
             out.println("read  " + brickAB[0]);
         }
 
-        final Type brickBType = findType(handle, false, buffer[5]);
-        brickAB[1] = new Brick(handle, false, brickBType, buffer[5], buffer[4]);
+        final Type brickBType = findType(handle, 'B', buffer[5]);
+        brickAB[1] = new Brick(handle, 'B', brickBType, buffer[5], buffer[4]);
         if (verbose) {
             out.println("read  " + brickAB[1]);
         }
@@ -104,7 +104,7 @@ public class WeDoBricks {
     }
 
     @SuppressWarnings("cast")
-    private Type findType(final Handle handle, final boolean isA, final byte id) {
+    private Type findType(final Handle handle, final char port, final byte id) {
         Type type;
         switch ((int) id & 0xff) {
         case 0xe6:
@@ -136,20 +136,21 @@ public class WeDoBricks {
             type = UNKNOWN;
         }
 
-        Map<Boolean, Type> hub = rememberedActuatorTypes.get(handle.getPath());
+        Map<Character, Type> hub = rememberedActuatorTypes
+                .get(handle.getPath());
         if (hub == null) {
             hub = new HashMap<>();
             rememberedActuatorTypes.put(handle.getPath(), hub);
         }
 
-        if (type == UNKNOWN && hub.containsKey(isA)) {
-            type = hub.get(isA);
+        if (type == UNKNOWN && hub.containsKey(port)) {
+            type = hub.get(port);
         }
 
         if (type != UNKNOWN && type != NOT_CONNECTED) {
-            hub.put(isA, type);
+            hub.put(port, type);
         } else {
-            hub.remove(isA);
+            hub.remove(port);
         }
 
         return type;
@@ -275,8 +276,10 @@ public class WeDoBricks {
         final byte otherValue = lookupOtherValue(brick);
         storeNewValue(brick, value);
 
-        final byte valueA = (byte) ((brick.isA() ? value : otherValue) & 0xff);
-        final byte valueB = (byte) ((brick.isA() ? otherValue : value) & 0xff);
+        final byte valueA = (byte) ((brick.getPort() == 'A' ? value
+                : otherValue) & 0xff);
+        final byte valueB = (byte) ((brick.getPort() == 'A' ? otherValue
+                : value) & 0xff);
         final byte[] buffer = new byte[9];
         buffer[0] = 0x00;
         buffer[1] = 0x40;
@@ -297,25 +300,25 @@ public class WeDoBricks {
     }
 
     private void storeNewValue(final Brick brick, final byte value) {
-        Map<Boolean, Byte> hub = rememberedActuatorValues.get(brick.getHandle()
-                .getPath());
+        Map<Character, Byte> hub = rememberedActuatorValues
+                .get(brick.getHandle().getPath());
         if (hub == null) {
             hub = new HashMap<>();
             rememberedActuatorValues.put(brick.getHandle().getPath(), hub);
         }
 
-        hub.put(brick.isA(), value);
+        hub.put(brick.getPort(), value);
     }
 
     private byte lookupOtherValue(final Brick brick) {
-        final Map<Boolean, Byte> hub = rememberedActuatorValues.get(brick
-                .getHandle().getPath());
+        final Map<Character, Byte> hub = rememberedActuatorValues
+                .get(brick.getHandle().getPath());
         if (hub == null) {
             return (byte) 0x00;
         }
 
-        // note the bang (!) because we look up the other value
-        final Byte otherValue = hub.get(!brick.isA());
+        // note that we look up the other port's value
+        final Byte otherValue = hub.get(brick.getPort() == 'A' ? 'B' : 'A');
         if (otherValue == null) {
             return (byte) 0x00;
         }
