@@ -21,7 +21,7 @@ $ ./wedo motor 127
 $ ./wedo reset
 ```
 
-#USB Permissions Under Linux
+# WeDo USB HUB Permissions Under Linux
 By default, the WeDo hubs get permissions that allow only root to write to the device. Here is the typical warning that you get in this situation.
 
 ```
@@ -36,7 +36,19 @@ To grant non-root users to access the WeDo devices, create a file named /etc/ude
 ATTRS{idVendor}=="0694", ATTRS{idProduct}=="0003", SUBSYSTEMS=="usb", ACTION=="add", MODE="0666"
 ```
  
-Then unplug the WeDO hubs and plug them back in. Your LEGO WeDo hubs should now be accessible.
+Then unplug the WeDO hubs and plug them back in. Your LEGO WeDo hubs should now be accessible.
+
+# BLE112 Bluetooth Dongle Permissions Under Linux
+By default, the BLE112 Bluetooth dongle is only readable by root and not by regular users.
+
+To grant non-root users to access the BLE112 dongle, create a file named /etc/udev/rules.d/ble112.rules with the following incantation:
+
+```
+ATTRS{idVendor}=="2458", ATTRS{idProduct}=="0001", SUBSYSTEMS=="usb", ACTION=="add", MODE="0666"
+```
+
+Then unplug the Bluetooth dongle and plug it back in. You should now be able to address it.
+
 # Brick Addressing
 Addressing bricks is tricky because neither USB nor LEGO WeDo hubs offer any way to uniquely identify an individual brick. WeDo sets come with a single hub and it is pretty obvious that they were designed to have only that one, single hub. This is fine for builds that use only a single hub, of course, but one of the design goals of the lego-wedo-java library is to support multiple hubs.
 
@@ -135,4 +147,7 @@ This code was written using these projects as a reference:
 - https://github.com/Salaboy/lego-wedo4j
 - https://github.com/PetrGlad/lego-wedo4j
 - https://github.com/LLK/scratchx/blob/gh-pages/scratch_extensions/wedoExtension.js
+- https://gist.github.com/blindman2k/11353842
 
+https://social.sbrick.com/wiki/view/pageId/11/slug/the-sbrick-ble-protocol
+https://social.sbrick.com/wiki/view/pageId/20/slug/linux-client-scripts
