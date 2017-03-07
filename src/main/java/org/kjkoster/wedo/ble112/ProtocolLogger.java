@@ -9,7 +9,7 @@ import org.thingml.bglib.BGAPIListener;
 
 /**
  * A BGAPI listener that tries to log all packets in a readable fashion, making
- * it easy to trace all the incoming packets
+ * it easy to trace all the incoming packets.
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
@@ -731,9 +731,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_system_read_memory(int address, byte[] data) {
-        out.printf("SYSTEM: receive_system_read_memory(address: " + address
-                + ")\n");
-        hexDump("data", data);
+        out.printf(
+                "SYSTEM: receive_system_read_memory(address: %d, data: %s)\n",
+                address, hexDump(data));
     }
 
     /**
@@ -801,8 +801,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_system_debug(byte[] data) {
-        out.printf("SYSTEM: receive_system_debug()\n");
-        hexDump("data", data);
+        out.printf("SYSTEM: receive_system_debug(data: %s)\n", hexDump(data));
     }
 
     /**
@@ -811,9 +810,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_system_endpoint_rx(int endpoint, byte[] data) {
-        out.printf("SYSTEM: receive_system_endpoint_rx(endpoint: " + endpoint
-                + ")\n");
-        hexDump("data", data);
+        out.printf(
+                "SYSTEM: receive_system_endpoint_rx(endpoint: %s, data: %s)\n",
+                endpoint, hexDump(data));
     }
 
     /**
@@ -854,9 +853,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_flash_ps_load(int result, byte[] value) {
-        out.printf("FLASH: receive_flash_ps_load(result: [0x%04x %s])\n",
-                result, reasonOrResult(result));
-        out.println(hexDump("value", value));
+        out.printf(
+                "FLASH: receive_flash_ps_load(result: [0x%04x %s], value: %s)\n",
+                result, reasonOrResult(result), hexDump(value));
     }
 
     /**
@@ -889,8 +888,8 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_flash_ps_key(int key, byte[] value) {
-        out.printf("FLASH: receive_flash_ps_key(key: %d])\n", key);
-        out.println(hexDump("value", value));
+        out.printf("FLASH: receive_flash_ps_key(key: %d], value: %s)\n", key,
+                hexDump(value));
     }
 
     /**
@@ -910,9 +909,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_read(int handle, int offset, int result,
             byte[] value) {
         out.printf(
-                "ATT: receive_attributes_read(handle: 0x%04x, offset: %d, result: [0x%04x %s])\n",
-                handle, offset, result, reasonOrResult(result));
-        out.println(hexDump("value", value));
+                "ATT: receive_attributes_read(handle: 0x%04x, offset: %d, result: [0x%04x %s], value: %s)\n",
+                handle, offset, result, reasonOrResult(result), hexDump(value));
     }
 
     /**
@@ -923,9 +921,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_read_type(int handle, int result,
             byte[] value) {
         out.printf(
-                "ATT: receive_attributes_read_type(handle: 0x%04x, result: [0x%04x %s])\n",
-                handle, result, reasonOrResult(result));
-        out.println(hexDump("value", value));
+                "ATT: receive_attributes_read_type(handle: 0x%04x, result: [0x%04x %s], value: %s)\n",
+                handle, result, reasonOrResult(result), hexDump(value));
     }
 
     /**
@@ -944,9 +941,9 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attributes_value(int connection, int reason, int handle,
             int offset, byte[] value) {
         out.printf(
-                "ATT: receive_attributes_value(connection: %d, reason: [0x%04x %s], handle: 0x%04x, offset: %d)\n",
-                connection, reason, reasonOrResult(reason), handle, offset);
-        out.println(hexDump("value", value));
+                "ATT: receive_attributes_value(connection: %d, reason: [0x%04x %s], handle: 0x%04x, offset: %d, value: %s)\n",
+                connection, reason, reasonOrResult(reason), handle, offset,
+                hexDump(value));
     }
 
     /**
@@ -1011,9 +1008,8 @@ public class ProtocolLogger implements BGAPIListener {
     @Override
     public void receive_connection_channel_map_get(int connection, byte[] map) {
         out.printf(
-                "CONNECTION: receive_connection_channel_map_set(connection: %d)\n",
-                connection);
-        out.println(hexDump("map", map));
+                "CONNECTION: receive_connection_channel_map_set(connection: %d, map: %s)\n",
+                connection, hexDump(map));
     }
 
     /**
@@ -1091,8 +1087,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_connection_feature_ind(int connection,
             byte[] features) {
         out.printf(
-                "CONNECTION: receive_connection_feature_ind(connection: %d)\n");
-        out.println(hexDump("features", features));
+                "CONNECTION: receive_connection_feature_ind(connection: %d, features: %s)\n",
+                hexDump(features));
     }
 
     /**
@@ -1101,8 +1097,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_connection_raw_rx(int connection, byte[] data) {
-        out.printf("CONNECTION: receive_connection_raw_rx(connection: %d)\n");
-        out.println(hexDump("data", data));
+        out.printf(
+                "CONNECTION: receive_connection_raw_rx(connection: %d, data: %s)\n",
+                hexDump(data));
     }
 
     /**
@@ -1314,9 +1311,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_attribute_value(int connection, int atthandle,
             int type, byte[] value) {
         out.printf(
-                "ATTCLIENT: receive_attclient_attribute_value(connection: %d, atthandle: 0x%04x, type: %d)\n",
-                connection, atthandle, type);
-        out.println(hexDump("value", value));
+                "ATTCLIENT: receive_attclient_attribute_value(connection: %d, atthandle: 0x%04x, type: %d, value: %s)\n",
+                connection, atthandle, type, hexDump(value));
     }
 
     /**
@@ -1327,9 +1323,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_attclient_read_multiple_response(int connection,
             byte[] handles) {
         out.printf(
-                "ATTCLIENT: receive_attclient_read_multiple_response(connection: %d)\n",
-                connection);
-        out.println(hexDump("handles", handles));
+                "ATTCLIENT: receive_attclient_read_multiple_response(connection: %d, handles: %s)\n",
+                connection, hexDump(handles));
     }
 
     /**
@@ -1337,7 +1332,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_encrypt_start(int handle, int result) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf(
+                "SM: receive_sm_encrypt_start(handle: 0x%04x, result: [0x%04x %s])\n",
+                handle, result, reasonOrResult(result));
     }
 
     /**
@@ -1345,7 +1342,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_set_bondable_mode() {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_set_bondable_mode()\n");
     }
 
     /**
@@ -1353,7 +1350,8 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_delete_bonding(int result) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_delete_bonding(result: [0x%04x %s])\n",
+                result, reasonOrResult(result));
     }
 
     /**
@@ -1361,7 +1359,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_set_parameters() {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_set_parameters()\n");
     }
 
     /**
@@ -1369,7 +1367,8 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_passkey_entry(int result) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_passkey_entry(result: [0x%04x %s])\n",
+                result, reasonOrResult(result));
     }
 
     /**
@@ -1377,7 +1376,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_get_bonds(int bonds) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_get_bonds(bonds: %d)\n", bonds);
     }
 
     /**
@@ -1385,7 +1384,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_set_oob_data() {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_set_oob_data()\n");
     }
 
     /**
@@ -1394,7 +1393,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_smp_data(int handle, int packet, byte[] data) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf(
+                "SM: receive_sm_smp_data(handle: 0x%04x, packet: %d, data: %s)\n",
+                handle, packet, hexDump(data));
     }
 
     /**
@@ -1402,7 +1403,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_bonding_fail(int handle, int result) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf(
+                "SM: receive_sm_bonding_fail(handle: 0x%04x, result: [0x%04x %s])\n",
+                handle, result, reasonOrResult(result));
     }
 
     /**
@@ -1410,7 +1413,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_passkey_display(int handle, int passkey) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf(
+                "SM: receive_sm_passkey_display(handle: 0x%04x, passkey: %d)\n",
+                handle, passkey);
     }
 
     /**
@@ -1418,7 +1423,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_sm_passkey_request(int handle) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf("SM: receive_sm_passkey_request(handle: 0x%04x)\n", handle);
     }
 
     /**
@@ -1428,7 +1433,9 @@ public class ProtocolLogger implements BGAPIListener {
     @Override
     public void receive_sm_bond_status(int bond, int keysize, int mitm,
             int keys) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        out.printf(
+                "SM: receive_sm_bond_status(bond: %d, keysize: %d, mitm: %d, keys: %d)\n",
+                bond, keysize, mitm, keys);
     }
 
     /**
@@ -1543,10 +1550,9 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_gap_scan_response(int rssi, int packet_type,
             BDAddr sender, int address_type, int bond, byte[] data) {
         out.printf(
-                "GAP: receive_gap_scan_response(rssi: %d dBm, packet_type: [0x%02x %s], sender: %s, address_type: %s, bond: 0x%02x)\n",
+                "GAP: receive_gap_scan_response(rssi: %d dBm, packet_type: [0x%02x %s], sender: %s, address_type: %s, bond: 0x%02x, data: %s)\n",
                 rssi, packet_type, packetType(packet_type), sender,
-                addressType(address_type), bond);
-        out.print(hexDump("data", data));
+                addressType(address_type), bond, hexDump(data));
     }
 
     /**
@@ -1656,9 +1662,8 @@ public class ProtocolLogger implements BGAPIListener {
     public void receive_hardware_spi_transfer(int result, int channel,
             byte[] data) {
         out.printf(
-                "HARDWARE: receive_hardware_spi_transfer(result: [0x%04x %s], channel: %d)\n",
-                result, reasonOrResult(result), channel);
-        out.print(hexDump("data", data));
+                "HARDWARE: receive_hardware_spi_transfer(result: [0x%04x %s], channel: %d, data: %s)\n",
+                result, reasonOrResult(result), channel, hexDump(data));
     }
 
     /**
@@ -1667,9 +1672,9 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_hardware_i2c_read(int result, byte[] data) {
-        out.printf("HARDWARE: receive_hardware_i2c_read(result: [0x%04x %s])\n",
-                result, reasonOrResult(result));
-        out.print(hexDump("data", data));
+        out.printf(
+                "HARDWARE: receive_hardware_i2c_read(result: [0x%04x %s], data: %s)\n",
+                result, reasonOrResult(result), hexDump(data));
     }
 
     /**
@@ -1758,7 +1763,7 @@ public class ProtocolLogger implements BGAPIListener {
      */
     @Override
     public void receive_test_get_channel_map(byte[] channel_map) {
-        out.printf("TEST: receive_test_get_channel_map()\n");
-        out.print(hexDump("channel_map", channel_map));
+        out.printf("TEST: receive_test_get_channel_map(channel_map: %s)\n",
+                hexDump(channel_map));
     }
 }

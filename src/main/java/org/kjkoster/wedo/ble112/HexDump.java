@@ -1,5 +1,6 @@
 package org.kjkoster.wedo.ble112;
 
+import static java.lang.String.format;
 import static java.lang.System.out;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -9,10 +10,12 @@ class HexDump {
     /**
      * Formatted hex dump like Wireshark does.
      * 
+     * @param bytes
+     *            The bytes to dump as hexdump.
      * @return The formatted string organised by columns
      */
-    public static String hexDump(final String argument, final byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
+    public static String hexDump(final byte[] bytes) {
+        StringBuilder sb = new StringBuilder("\n");
         int step = 8;
         long startAddress = 0L;
 
@@ -24,12 +27,11 @@ class HexDump {
             }
 
             if (i % step == 0) {
-                sb.append(String.format("    %s %04d:  ", argument,
-                        startAddress));
+                sb.append(format("    %04d:  ", startAddress));
                 startAddress += step;
             }
 
-            sb.append(String.format("0x%02x ", bytes[i] & 0xff));
+            sb.append(format("0x%02x ", bytes[i] & 0xff));
 
             if (i == bytes.length - 1) {
                 // We print out the last printable part
@@ -38,8 +40,9 @@ class HexDump {
                 String padder = new String(
                         new char[step - (bytes.length % step)]).replace("\0",
                                 "     ");
-                if (isMultipleLength)
+                if (isMultipleLength) {
                     padder = "";
+                }
                 sb.append(padder);
                 sb.append(" '");
 
@@ -92,12 +95,11 @@ class HexDump {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-        out.println(hexDump("short", testShort));
+        out.println(hexDump(testShort));
 
-        out.println(hexDump("loooong", testLarge));
+        out.println(hexDump(testLarge));
 
-        out.println(hexDump("poo",
-                "The pile of poo UTF-8 test: \u20AC \uD83D\uDCA9."
-                        .getBytes(UTF_8)));
+        out.println(hexDump("The pile of poo UTF-8 test: \u20AC \uD83D\uDCA9."
+                .getBytes(UTF_8)));
     }
 }
