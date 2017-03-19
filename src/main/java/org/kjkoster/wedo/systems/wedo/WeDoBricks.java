@@ -227,14 +227,35 @@ public class WeDoBricks {
         actuator(false, true, intensity, false, true);
     }
 
+    /**
+     * Set all actuators to the specified value. This does nothing if no
+     * actuators were found.
+     * 
+     * @param value
+     *            The value to set the actuator to (0 to 127, 0 is off).
+     */
     public void all(final byte value) {
         actuator(true, true, value, true, true);
     }
 
+    /**
+     * Set all actuators on connection A to the specified value. This does
+     * nothing if no actuators were found.
+     * 
+     * @param value
+     *            The value to set the actuator to (0 to 127, 0 is off).
+     */
     public void allA(final byte value) {
         actuator(true, false, value, true, true);
     }
 
+    /**
+     * Set all actuators on connector B to the specified value. This does
+     * nothing if no actuators were found.
+     * 
+     * @param value
+     *            The value to set the actuator to (0 to 127, 0 is off).
+     */
     public void allB(final byte value) {
         actuator(false, true, value, true, true);
     }
