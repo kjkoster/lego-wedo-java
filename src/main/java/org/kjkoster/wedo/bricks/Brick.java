@@ -10,9 +10,9 @@ import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 import org.kjkoster.wedo.transport.usb.HubHandle;
 
 /**
- * The representation of a single LEGO WeDo brick. To be precise, this is the
+ * The representation of a single LEGO brick. To be precise, this is the
  * representation of a connector on a hub. Empty spots are represented as bricks
- * too, of a not connected type.
+ * too, of a &quot;not connected&quot; type.
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
