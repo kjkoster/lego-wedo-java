@@ -252,19 +252,7 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
                         (byte) 0xff, (byte) 0xff);
             }
             foundBricks.put(handle, bricks);
-            byte[] data = { 0x01, 0x00, 0x00, (byte) 0xFE };
-            bgapi.send_attclient_attribute_write(connection, 0x001a, data);
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                throw new Error("NOT IMPLEMENTED..."); // TODO
-            }
-            bgapi.send_attclient_read_by_handle(connection, 0x001a);
-            try {
-                Thread.sleep(5000L);
-            } catch (InterruptedException e) {
-                throw new Error("NOT IMPLEMENTED..."); // TODO
-            }
+            bgapi.send_connection_disconnect(connection);
             break;
 
         default:
