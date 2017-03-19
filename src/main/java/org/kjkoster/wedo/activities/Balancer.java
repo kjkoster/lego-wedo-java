@@ -11,7 +11,7 @@ import static org.kjkoster.wedo.bricks.Tilt.Direction.RIGHT;
 import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Tilt;
-import org.kjkoster.wedo.bricks.WeDoBricks;
+import org.kjkoster.wedo.systems.wedo.WeDoBricks;
 import org.kjkoster.wedo.transport.usb.Usb;
 
 /**

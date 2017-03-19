@@ -1,9 +1,4 @@
-package org.kjkoster.wedo.sbrick;
-
-import java.util.Map;
-
-import org.kjkoster.wedo.bricks.Brick;
-import org.kjkoster.wedo.transport.usb.Handle;
+package org.kjkoster.wedo.systems.sbrick;
 
 /**
  * A class to represent the collection of SBricks and SBrick Pluses.

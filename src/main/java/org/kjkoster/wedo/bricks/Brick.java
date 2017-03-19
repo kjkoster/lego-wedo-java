@@ -7,7 +7,7 @@ import static java.lang.String.format;
 import static org.kjkoster.wedo.bricks.Brick.Type.DISTANCE;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 
-import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.transport.usb.HubHandle;
 
 /**
  * The representation of a single LEGO WeDo brick. To be precise, this is the
@@ -17,7 +17,7 @@ import org.kjkoster.wedo.transport.usb.Handle;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class Brick {
-    private final Handle handle;
+    private final HubHandle hubHandle;
     private final char port;
 
     private final byte id;
@@ -28,9 +28,8 @@ public class Brick {
     /**
      * Create a new brick representation.
      * 
-     * @param handle
-     *            The USB device handle of the device that this brick is
-     *            connected to.
+     * @param hubHandle
+     *            The hub handle of the hub that this brick is connected to.
      * @param port
      *            The capital letter designating the port on the hub that this
      *            brick is connected to.
@@ -41,9 +40,9 @@ public class Brick {
      * @param value
      *            The value of the value byte that was read from the WeDo hub.
      */
-    public Brick(final Handle handle, final char port, final Type type,
+    public Brick(final HubHandle hubHandle, final char port, final Type type,
             final byte id, final byte value) {
-        this.handle = checkNotNull(handle);
+        this.hubHandle = checkNotNull(hubHandle);
         checkArgument(port >= 'A' && port <= 'Z', "invalid port %c", port);
         this.port = port;
         this.type = checkNotNull(type);
@@ -51,8 +50,13 @@ public class Brick {
         this.value = value;
     }
 
-    Handle getHandle() {
-        return handle;
+    /**
+     * Get the (supposedly opaque) handle for this brick.
+     * 
+     * @return The handle for this brick.
+     */
+    public HubHandle getHubHandle() {
+        return hubHandle;
     }
 
     /**
@@ -148,7 +152,7 @@ public class Brick {
             sensorData = "";
         }
 
-        return format("[%s brick %c: %s id: 0x%02x value: 0x%02x%s]", handle,
+        return format("[%s brick %c: %s id: 0x%02x value: 0x%02x%s]", hubHandle,
                 port, type, id, value, sensorData);
     }
 }

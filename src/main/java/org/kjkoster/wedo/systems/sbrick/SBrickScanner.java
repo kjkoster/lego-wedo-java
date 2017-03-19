@@ -1,4 +1,4 @@
-package org.kjkoster.wedo.sbrick;
+package org.kjkoster.wedo.systems.sbrick;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.format;
@@ -23,7 +23,7 @@ import java.util.Queue;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.transport.ble112.BLE112Address;
 import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
-import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
@@ -77,7 +77,7 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
     /**
      * The complete and supported SBricks that we found so far.
      */
-    private final Map<Handle, Brick[]> foundBricks = new HashMap<>();
+    private final Map<HubHandle, Brick[]> foundBricks = new HashMap<>();
 
     /**
      * Start a new scanner to look for SBricks.
@@ -127,7 +127,7 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
-    public Map<Handle, Brick[]> readAll() {
+    public Map<HubHandle, Brick[]> readAll() {
         bgapi.send_gap_set_scan_parameters(10, 250, 1 /* XXX magic numbers */);
         bgapi.send_gap_discover(1 /* gap_discover_generic */);
 
@@ -244,7 +244,7 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
             break;
 
         case HANDLE_NAME:
-            final Handle handle = new Handle(connectedAddress,
+            final HubHandle handle = new HubHandle(connectedAddress,
                     format("%s, V%s", new String(value), version));
             final Brick[] bricks = new Brick[4];
             for (int i = 0; i < 4; i++) {
@@ -252,7 +252,19 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
                         (byte) 0xff, (byte) 0xff);
             }
             foundBricks.put(handle, bricks);
-            bgapi.send_connection_disconnect(connection);
+            byte[] data = { 0x01, 0x00, 0x00, (byte) 0xFE };
+            bgapi.send_attclient_attribute_write(connection, 0x001a, data);
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                throw new Error("NOT IMPLEMENTED..."); // TODO
+            }
+            bgapi.send_attclient_read_by_handle(connection, 0x001a);
+            try {
+                Thread.sleep(5000L);
+            } catch (InterruptedException e) {
+                throw new Error("NOT IMPLEMENTED..."); // TODO
+            }
             break;
 
         default:

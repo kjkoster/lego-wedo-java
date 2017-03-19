@@ -18,9 +18,9 @@ import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
-import org.kjkoster.wedo.bricks.WeDoBricks;
-import org.kjkoster.wedo.sbrick.SBrickScanner;
-import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.systems.sbrick.SBrickScanner;
+import org.kjkoster.wedo.systems.wedo.WeDoBricks;
+import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
@@ -184,11 +184,11 @@ public class WeDo {
             throws IOException {
         out.printf("Scanning for LEGO WeDo hubs...\n\n");
 
-        Map<Handle, Brick[]> hubs = weDoBricks.readAll();
+        Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
         if (hubs.size() == 0) {
             out.println("No LEGO WeDo hubs found.");
         } else {
-            for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
                 // we don't show the USB address, it changes a lot.
                 out.println(hub.getKey().getProductName());
                 for (final Brick brick : hub.getValue()) {
@@ -211,7 +211,7 @@ public class WeDo {
                 if (hubs.size() == 0) {
                     out.println("No Vengit SBricks or SBrick Pluses found.");
                 } else {
-                    for (final Map.Entry<Handle, Brick[]> hub : hubs
+                    for (final Map.Entry<HubHandle, Brick[]> hub : hubs
                             .entrySet()) {
                         out.println(hub.getKey().getProductName() + ", at "
                                 + hub.getKey().getPath());
@@ -244,8 +244,8 @@ public class WeDo {
     private static void sensor(int repeat, final boolean showDistance,
             final boolean showTilt) throws InterruptedException {
         while (repeat == -1 || repeat > 0) {
-            final Map<Handle, Brick[]> hubs = weDoBricks.readAll();
-            for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+            final Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
+            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
                 for (final Brick brick : hub.getValue()) {
                     switch (brick.getType()) {
                     case DISTANCE:

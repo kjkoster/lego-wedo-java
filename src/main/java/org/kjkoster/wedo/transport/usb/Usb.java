@@ -77,9 +77,9 @@ public class Usb implements Closeable {
      * 
      * @return A map with a data entry for each USB device handle.
      */
-    public Map<Handle, byte[]> readFromAll() {
+    public Map<HubHandle, byte[]> readFromAll() {
         try {
-            final Map<Handle, byte[]> packets = new HashMap<>();
+            final Map<HubHandle, byte[]> packets = new HashMap<>();
             for (final HIDDeviceInfo hidDeviceInfo : HIDManager.getInstance()
                     .listDevices()) {
                 if (hidDeviceInfo.getVendor_id() == VENDORID_LEGO
@@ -95,7 +95,7 @@ public class Usb implements Closeable {
     }
 
     private void read(final HIDDeviceInfo hidDeviceInfo,
-            final Map<Handle, byte[]> packets) {
+            final Map<HubHandle, byte[]> packets) {
         try {
             final String productName = hidDeviceInfo.getProduct_string();
             if (productName == null) {
@@ -106,28 +106,28 @@ public class Usb implements Closeable {
                         hidDeviceInfo.getPath());
                 return;
             }
-            final Handle handle = new Handle(hidDeviceInfo.getPath(),
+            final HubHandle hubHandle = new HubHandle(hidDeviceInfo.getPath(),
                     productName);
 
             final byte[] buffer = new byte[PACKETSIZE];
-            final int bytesRead = open(handle).readTimeout(buffer,
+            final int bytesRead = open(hubHandle).readTimeout(buffer,
                     (int) MILLISECONDS.toMillis(100L));
             if (bytesRead != PACKETSIZE) {
                 // there was a time-out, and we did not get a packet.
                 err.printf(
                         "expected %d bytes but received %d reading %s, timeout?",
-                        PACKETSIZE, bytesRead, handle);
+                        PACKETSIZE, bytesRead, hubHandle);
                 return;
             }
 
             if (verbose) {
                 out.printf(
                         "  USB read  %s: 0x%02x 0x%02x [value A: 0x%02x] [id A: 0x%02x] [value B: 0x%02x] [id B: 0x%02x] 0x%02x 0x%02x\n",
-                        handle, buffer[0], buffer[1], buffer[2], buffer[3],
+                        hubHandle, buffer[0], buffer[1], buffer[2], buffer[3],
                         buffer[4], buffer[5], buffer[6], buffer[7]);
             }
 
-            packets.put(handle, buffer);
+            packets.put(hubHandle, buffer);
         } catch (IOException e) {
             err.printf("unexpected exception reading from %s: %s",
                     hidDeviceInfo.getPath(), e.getMessage());
@@ -139,45 +139,47 @@ public class Usb implements Closeable {
      * Write a packet of bytes to the USB device. If the write fails, an
      * exception is thrown.
      * 
-     * @param handle
+     * @param hubHandle
      *            The USB device handle of the device to write to.
      * @param buffer
      *            The bytes to write.
      */
-    public void write(final Handle handle, final byte[] buffer) {
-        checkNotNull(handle);
+    public void write(final HubHandle hubHandle, final byte[] buffer) {
+        checkNotNull(hubHandle);
         checkNotNull(buffer);
         checkArgument(buffer.length == 9);
 
         if (verbose) {
             out.printf(
                     "  USB write %s: 0x%02x 0x%02x [value A: 0x%02x] [value B: 0x%02x] 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n",
-                    handle, buffer[0], buffer[1], buffer[2], buffer[3],
+                    hubHandle, buffer[0], buffer[1], buffer[2], buffer[3],
                     buffer[4], buffer[5], buffer[6], buffer[7], buffer[8]);
         }
 
         try {
-            final int bytesWritten = open(handle).write(buffer);
+            final int bytesWritten = open(hubHandle).write(buffer);
             if (bytesWritten != buffer.length) {
-                throw new IOException(format(
-                        "expected to write %d bytes to %s, but wrote %d",
-                        buffer.length, handle, bytesWritten));
+                throw new IOException(
+                        format("expected to write %d bytes to %s, but wrote %d",
+                                buffer.length, hubHandle, bytesWritten));
             }
         } catch (IOException e) {
             throw sneakyThrow(e);
         }
     }
 
-    private synchronized HIDDevice open(final Handle handle) throws IOException {
-        HIDDevice hidDevice = openDevices.get(handle.getPath());
+    private synchronized HIDDevice open(final HubHandle hubHandle)
+            throws IOException {
+        HIDDevice hidDevice = openDevices.get(hubHandle.getPath());
         if (hidDevice == null) {
-            hidDevice = HIDManager.getInstance().openByPath(handle.getPath());
+            hidDevice = HIDManager.getInstance()
+                    .openByPath(hubHandle.getPath());
             if (hidDevice == null) {
                 err.printf(
                         "unable to open device %s, claimed by another application?",
-                        handle);
+                        hubHandle);
             }
-            openDevices.put(handle.getPath(), hidDevice);
+            openDevices.put(hubHandle.getPath(), hidDevice);
         }
         return hidDevice;
     }

@@ -1,4 +1,4 @@
-package org.kjkoster.wedo.bricks;
+package org.kjkoster.wedo.systems.wedo;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -15,8 +15,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Brick.Type;
-import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.bricks.Distance;
+import org.kjkoster.wedo.bricks.Tilt;
+import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
@@ -74,9 +77,9 @@ public class WeDoBricks {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
-    public Map<Handle, Brick[]> readAll() {
-        final Map<Handle, Brick[]> bricks = new HashMap<>();
-        for (final Map.Entry<Handle, byte[]> packetRead : usb.readFromAll()
+    public Map<HubHandle, Brick[]> readAll() {
+        final Map<HubHandle, Brick[]> bricks = new HashMap<>();
+        for (final Map.Entry<HubHandle, byte[]> packetRead : usb.readFromAll()
                 .entrySet()) {
             bricks.put(packetRead.getKey(),
                     parseBrickAB(packetRead.getKey(), packetRead.getValue()));
@@ -84,18 +87,20 @@ public class WeDoBricks {
         return bricks;
     }
 
-    private synchronized Brick[] parseBrickAB(final Handle handle,
+    private synchronized Brick[] parseBrickAB(final HubHandle hubHandle,
             final byte[] buffer) {
         final Brick[] brickAB = new Brick[2];
 
-        final Type brickAType = findType(handle, 'A', buffer[3]);
-        brickAB[0] = new Brick(handle, 'A', brickAType, buffer[3], buffer[2]);
+        final Type brickAType = findType(hubHandle, 'A', buffer[3]);
+        brickAB[0] = new Brick(hubHandle, 'A', brickAType, buffer[3],
+                buffer[2]);
         if (verbose) {
             out.println("read  " + brickAB[0]);
         }
 
-        final Type brickBType = findType(handle, 'B', buffer[5]);
-        brickAB[1] = new Brick(handle, 'B', brickBType, buffer[5], buffer[4]);
+        final Type brickBType = findType(hubHandle, 'B', buffer[5]);
+        brickAB[1] = new Brick(hubHandle, 'B', brickBType, buffer[5],
+                buffer[4]);
         if (verbose) {
             out.println("read  " + brickAB[1]);
         }
@@ -104,7 +109,8 @@ public class WeDoBricks {
     }
 
     @SuppressWarnings("cast")
-    private Type findType(final Handle handle, final char port, final byte id) {
+    private Type findType(final HubHandle hubHandle, final char port,
+            final byte id) {
         Type type;
         switch ((int) id & 0xff) {
         case 0xe6:
@@ -137,10 +143,10 @@ public class WeDoBricks {
         }
 
         Map<Character, Type> hub = rememberedActuatorTypes
-                .get(handle.getPath());
+                .get(hubHandle.getPath());
         if (hub == null) {
             hub = new HashMap<>();
-            rememberedActuatorTypes.put(handle.getPath(), hub);
+            rememberedActuatorTypes.put(hubHandle.getPath(), hub);
         }
 
         if (type == UNKNOWN && hub.containsKey(port)) {
@@ -250,8 +256,8 @@ public class WeDoBricks {
             final byte value, final boolean setMotor, final boolean setLight) {
         checkArgument(setA || setB);
 
-        final Map<Handle, Brick[]> hubs = readAll();
-        for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+        final Map<HubHandle, Brick[]> hubs = readAll();
+        for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
             if (setA) {
                 actuator(hub.getValue()[0], value, setMotor, setLight);
             }
@@ -296,15 +302,15 @@ public class WeDoBricks {
                     valueA, valueB);
         }
 
-        usb.write(brick.getHandle(), buffer);
+        usb.write(brick.getHubHandle(), buffer);
     }
 
     private void storeNewValue(final Brick brick, final byte value) {
         Map<Character, Byte> hub = rememberedActuatorValues
-                .get(brick.getHandle().getPath());
+                .get(brick.getHubHandle().getPath());
         if (hub == null) {
             hub = new HashMap<>();
-            rememberedActuatorValues.put(brick.getHandle().getPath(), hub);
+            rememberedActuatorValues.put(brick.getHubHandle().getPath(), hub);
         }
 
         hub.put(brick.getPort(), value);
@@ -312,7 +318,7 @@ public class WeDoBricks {
 
     private byte lookupOtherValue(final Brick brick) {
         final Map<Character, Byte> hub = rememberedActuatorValues
-                .get(brick.getHandle().getPath());
+                .get(brick.getHubHandle().getPath());
         if (hub == null) {
             return (byte) 0x00;
         }
@@ -330,8 +336,8 @@ public class WeDoBricks {
      * Reset the devices by setting all values to 0.
      */
     public void reset() {
-        final Map<Handle, Brick[]> hubs = readAll();
-        for (final Map.Entry<Handle, Brick[]> hub : hubs.entrySet()) {
+        final Map<HubHandle, Brick[]> hubs = readAll();
+        for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
             write(hub.getValue()[0], (byte) 0x00);
             write(hub.getValue()[1], (byte) 0x00);
         }
