@@ -10,7 +10,7 @@ import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.bricks.WeDoBricks;
-import org.kjkoster.wedo.usb.Usb;
+import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
  * A basic useless box with a motor and a tilt sensor.

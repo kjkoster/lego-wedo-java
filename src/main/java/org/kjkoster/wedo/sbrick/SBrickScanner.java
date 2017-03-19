@@ -20,10 +20,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import org.kjkoster.wedo.ble112.BLE112Address;
-import org.kjkoster.wedo.ble112.ProtocolLogger;
 import org.kjkoster.wedo.bricks.Brick;
-import org.kjkoster.wedo.usb.Handle;
+import org.kjkoster.wedo.transport.ble112.BLE112Address;
+import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
+import org.kjkoster.wedo.transport.usb.Handle;
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;

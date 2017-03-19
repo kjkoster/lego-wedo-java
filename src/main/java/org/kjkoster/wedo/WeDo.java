@@ -20,8 +20,8 @@ import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.bricks.WeDoBricks;
 import org.kjkoster.wedo.sbrick.SBrickScanner;
-import org.kjkoster.wedo.usb.Handle;
-import org.kjkoster.wedo.usb.Usb;
+import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
  * The command line tool's main entry point.

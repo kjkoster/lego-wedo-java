@@ -9,7 +9,7 @@ import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.WeDoBricks;
-import org.kjkoster.wedo.usb.Usb;
+import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
  * LEGO WeDo's hungry alligator.

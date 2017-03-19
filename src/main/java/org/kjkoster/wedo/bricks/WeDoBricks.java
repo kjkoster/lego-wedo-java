@@ -16,8 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kjkoster.wedo.bricks.Brick.Type;
-import org.kjkoster.wedo.usb.Handle;
-import org.kjkoster.wedo.usb.Usb;
+import org.kjkoster.wedo.transport.usb.Handle;
+import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
  * A class to represent the collection of LEGO WeDo hubs and bricks that are

@@ -1,4 +1,4 @@
-package org.kjkoster.wedo.ble112;
+package org.kjkoster.wedo.transport.ble112;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

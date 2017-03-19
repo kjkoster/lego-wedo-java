@@ -1,8 +1,8 @@
-package org.kjkoster.wedo.ble112;
+package org.kjkoster.wedo.transport.ble112;
 
 import static java.lang.String.format;
 import static java.lang.System.out;
-import static org.kjkoster.wedo.ble112.HexDump.hexDump;
+import static org.kjkoster.wedo.transport.ble112.HexDump.hexDump;
 
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPIListener;

@@ -1,4 +1,4 @@
-package org.kjkoster.wedo.usb;
+package org.kjkoster.wedo.transport.usb;
 
 import static com.codeminders.hidapi.ClassPathLibraryLoader.loadNativeHIDLibrary;
 import static com.google.common.base.Preconditions.checkArgument;

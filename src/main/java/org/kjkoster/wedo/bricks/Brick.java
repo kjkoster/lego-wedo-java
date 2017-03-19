@@ -7,7 +7,7 @@ import static java.lang.String.format;
 import static org.kjkoster.wedo.bricks.Brick.Type.DISTANCE;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 
-import org.kjkoster.wedo.usb.Handle;
+import org.kjkoster.wedo.transport.usb.Handle;
 
 /**
  * The representation of a single LEGO WeDo brick. To be precise, this is the

@@ -1,4 +1,4 @@
-package org.kjkoster.wedo.ble112;
+package org.kjkoster.wedo.transport.ble112;
 
 import static java.lang.String.format;
 import static java.lang.System.out;
