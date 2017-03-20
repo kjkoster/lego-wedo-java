@@ -23,6 +23,7 @@ import org.thingml.bglib.BGAPITransport;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class SBricks extends BGAPIDefaultListener implements Closeable {
+    private final File ble112Device;
     /**
      * The BGAPI interface.
      */
@@ -40,6 +41,8 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
             throws FileNotFoundException {
         super();
 
+        this.ble112Device = ble112Device;
+        
         final BGAPITransport bgapiTransport = new BGAPITransport(
                 new FileInputStream(ble112Device),
                 new FileOutputStream(ble112Device));
@@ -48,6 +51,34 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
             bgapi.addListener(new ProtocolLogger());
         }
         bgapi.addListener(this);
+
+        if (verbose) {
+            bgapi.send_system_get_info();
+        }
+    }
+
+    /**
+     * @see org.thingml.bglib.BGAPIListener#receive_system_boot(int, int, int,
+     *      int, int, int, int)
+     */
+    @Override
+    public void receive_system_boot(int major, int minor, int patch, int build,
+            int ll_version, int protocol_version, int hw) {
+        receive_system_get_info(major, minor, patch, build, ll_version,
+                protocol_version, hw);
+    }
+
+    /**
+     * @see org.thingml.bglib.BGAPIListener#receive_system_get_info(int, int,
+     *      int, int, int, int, int)
+     */
+    @Override
+    public void receive_system_get_info(int major, int minor, int patch,
+            int build, int ll_version, int protocol_version, int hw) {
+        out.printf(
+                "%s: version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d.\n",
+                ble112Device, major, minor, patch, build, ll_version,
+                protocol_version, hw);
     }
 
     /**
