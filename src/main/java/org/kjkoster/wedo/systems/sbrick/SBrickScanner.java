@@ -9,12 +9,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.Lombok.sneakyThrow;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 
-import java.io.Closeable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -22,12 +16,10 @@ import java.util.Queue;
 
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.transport.ble112.BLE112Address;
-import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
 import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
-import org.thingml.bglib.BGAPITransport;
 
 /**
  * A scanner that searches for SBrick and SBrick Plus BLE hubs. Scanning,
@@ -39,7 +31,7 @@ import org.thingml.bglib.BGAPITransport;
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
+class SBrickScanner extends BGAPIDefaultListener {
     private static final int HANDLE_VENDOR = 0x10;
     private static final int HANDLE_VERSION = 0x0a;
     private static final int HANDLE_NAME = 0x03;
@@ -82,33 +74,13 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
     /**
      * Start a new scanner to look for SBricks.
      * 
-     * @param ble112Device
-     *            The device that the BLE112 is represented as on your system.
-     * @param verbose
-     *            If <code>true</code>, log all BLE messages.
-     * @throws FileNotFoundException
-     *             When the specified device could not be opened.
+     * @param bgapi
+     *            The BLE112 API to use.
      */
-    public SBrickScanner(final File ble112Device, final boolean verbose)
-            throws FileNotFoundException {
+    SBrickScanner(final BGAPI bgapi) {
         super();
 
-        final BGAPITransport bgapiTransport = new BGAPITransport(
-                new FileInputStream(ble112Device),
-                new FileOutputStream(ble112Device));
-        this.bgapi = new BGAPI(bgapiTransport);
-        if (verbose) {
-            bgapi.addListener(new ProtocolLogger());
-        }
-        bgapi.addListener(this);
-    }
-
-    /**
-     * @see java.io.Closeable#close()
-     */
-    @Override
-    public void close() throws IOException {
-        bgapi.disconnect();
+        this.bgapi = bgapi;
     }
 
     private void sleep() {
@@ -127,7 +99,9 @@ public class SBrickScanner extends BGAPIDefaultListener implements Closeable {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
-    public Map<HubHandle, Brick[]> readAll() {
+    Map<HubHandle, Brick[]> readAll() {
+        // XXX trigger a version report from the BLE112 device.
+
         bgapi.send_gap_set_scan_parameters(10, 250, 1 /* XXX magic numbers */);
         bgapi.send_gap_discover(1 /* gap_discover_generic */);
 

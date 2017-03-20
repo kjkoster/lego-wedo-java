@@ -3,8 +3,4 @@
 # A command line utility to interface with LEGO WeDo blocks.
 #
 
-if [ -e /dev/cu.usbmodem1 ]; then
-	ARGS="${ARGS} -ble112 /dev/cu.usbmodem1"
-fi
-
-java -cp target/wedo-0.0.1-SNAPSHOT.jar org.kjkoster.wedo.WeDo ${ARGS} ${*}
+java -cp target/wedo-0.0.1-SNAPSHOT.jar org.kjkoster.wedo.WeDo ${*}

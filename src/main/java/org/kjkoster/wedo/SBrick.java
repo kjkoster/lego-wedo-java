@@ -5,6 +5,7 @@ import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
 import static org.apache.commons.cli.Option.builder;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
@@ -17,17 +18,17 @@ import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Tilt;
-import org.kjkoster.wedo.systems.wedo.WeDoBricks;
+import org.kjkoster.wedo.systems.sbrick.SBricks;
 import org.kjkoster.wedo.transport.usb.HubHandle;
-import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
- * The WeDo command line tool's main entry point.
+ * The Vengit SBrick and SBrick Plus command line tool's main entry point.
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class WeDo {
+public class SBrick {
     private static final String VERBOSE = "v";
+    private static final String BLE112DEVICE = "ble112";
 
     private static final String RESET = "reset";
     private static final String LIST = "list";
@@ -48,8 +49,6 @@ public class WeDo {
     private static final String MOTOR_A = "motorA";
     private static final String MOTOR_B = "motorB";
 
-    private static WeDoBricks weDoBricks = null;
-
     /**
      * The main application entry point.
      * 
@@ -65,55 +64,54 @@ public class WeDo {
         final CommandLine commandLine = parseCommandLine(options, args);
 
         final boolean verbose = commandLine.hasOption(VERBOSE);
+        final File ble112Device = commandLine.hasOption(BLE112DEVICE)
+                ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
-        try (final Usb usb = new Usb(verbose)) {
-            weDoBricks = new WeDoBricks(usb, verbose);
-
+        try (final SBricks sBricks = new SBricks(ble112Device, verbose)) {
             if (commandLine.hasOption(RESET)) {
-                weDoBricks.reset();
+                sBricks.reset();
             } else if (commandLine.hasOption(LIST)) {
-                list(verbose);
+                list(sBricks);
             } else if (commandLine.hasOption(SENSOR)) {
                 final String value = commandLine.getOptionValue(SENSOR);
-                sensor(value == null ? -1 : parseInt(value), true, true);
+                sensor(sBricks, value == null ? -1 : parseInt(value), true,
+                        true);
             } else if (commandLine.hasOption(DISTANCE)) {
                 final String value = commandLine.getOptionValue(DISTANCE);
-                sensor(value == null ? -1 : parseInt(value), true, false);
+                sensor(sBricks, value == null ? -1 : parseInt(value), true,
+                        false);
             } else if (commandLine.hasOption(TILT)) {
                 final String value = commandLine.getOptionValue(TILT);
-                sensor(value == null ? -1 : parseInt(value), false, true);
+                sensor(sBricks, value == null ? -1 : parseInt(value), false,
+                        true);
             } else if (commandLine.hasOption(MOTOR)) {
-                weDoBricks.motor(parseByte(commandLine.getOptionValue(MOTOR)));
+                sBricks.motor(parseByte(commandLine.getOptionValue(MOTOR)));
             } else if (commandLine.hasOption(MOTOR_A)) {
-                weDoBricks
-                        .motorA(parseByte(commandLine.getOptionValue(MOTOR_A)));
+                sBricks.motorA(parseByte(commandLine.getOptionValue(MOTOR_A)));
             } else if (commandLine.hasOption(MOTOR_B)) {
-                weDoBricks
-                        .motorB(parseByte(commandLine.getOptionValue(MOTOR_B)));
+                sBricks.motorB(parseByte(commandLine.getOptionValue(MOTOR_B)));
             } else if (commandLine.hasOption(LIGHT)) {
-                weDoBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
+                sBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
             } else if (commandLine.hasOption(LIGHT_A)) {
-                weDoBricks
-                        .lightA(parseByte(commandLine.getOptionValue(LIGHT_A)));
+                sBricks.lightA(parseByte(commandLine.getOptionValue(LIGHT_A)));
             } else if (commandLine.hasOption(LIGHT_B)) {
-                weDoBricks
-                        .lightB(parseByte(commandLine.getOptionValue(LIGHT_B)));
+                sBricks.lightB(parseByte(commandLine.getOptionValue(LIGHT_B)));
             } else if (commandLine.hasOption(ALL)) {
-                weDoBricks.all(parseByte(commandLine.getOptionValue(ALL)));
+                sBricks.all(parseByte(commandLine.getOptionValue(ALL)));
             } else if (commandLine.hasOption(ALL_A)) {
-                weDoBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
+                sBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
             } else if (commandLine.hasOption(ALL_B)) {
-                weDoBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
+                sBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
             } else {
                 final HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("wedo", options);
+                formatter.printHelp("sbrick", options);
                 System.exit(1);
             }
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
             // It seems that under Mac OS X a thread is still stuck in the
-            // hidapi USB library, so we force the JVM to exit.
+            // BGLIB library, so we force the JVM to exit.
             System.exit(0);
         }
     }
@@ -122,9 +120,11 @@ public class WeDo {
         final Options options = new Options();
 
         options.addOption(VERBOSE, "verbose output");
+        options.addOption(BLE112DEVICE, true,
+                "the file path to your BLE112 dongle. On Mac OS X, this is typically /dev/cu.usbmodem1");
 
         options.addOption(RESET, "reset all bricks");
-        options.addOption(LIST, "list WeDo hubs");
+        options.addOption(LIST, "list SBricks and SBrick Pluses");
         options.addOption(builder(SENSOR).optionalArg(true)
                 .desc("read all sensors [<n>] times (default repeat forever)")
                 .build());
@@ -161,22 +161,13 @@ public class WeDo {
         return commandLineParser.parse(options, arguments);
     }
 
-    /**
-     * Print information on the WeDo hubs attached to this computer, and the
-     * devices connected to them. The list is unordered.
-     * <p>
-     * We have no reliable way of addressing specific bricks connected to a
-     * specific hub. If you study the output of the verbose you will find that
-     * WeDo hubs do not seem to have identifying information. Further, the order
-     * in which the hubs are reported by the <code>listDevices()</code> method
-     * is random (though tantalisingly stable at times).
-     */
-    private static void list(final boolean verbose) throws IOException {
-        out.printf("Scanning for LEGO WeDo hubs...\n\n");
+    private static void list(final SBricks sBricks) throws IOException {
+        out.printf(
+                "Scanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
-        final Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
+        final Map<HubHandle, Brick[]> hubs = sBricks.readAll();
         if (hubs.size() == 0) {
-            out.println("No LEGO WeDo hubs found.");
+            out.println("No SBricks or SBrick Pluses found.");
         } else {
             for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
                 // we don't show the USB address, it changes a lot.
@@ -205,10 +196,11 @@ public class WeDo {
                 + sensorData);
     }
 
-    private static void sensor(int repeat, final boolean showDistance,
-            final boolean showTilt) throws InterruptedException {
+    private static void sensor(final SBricks sBricks, int repeat,
+            final boolean showDistance, final boolean showTilt)
+            throws InterruptedException {
         while (repeat == -1 || repeat > 0) {
-            final Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
+            final Map<HubHandle, Brick[]> hubs = sBricks.readAll();
             for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
                 for (final Brick brick : hub.getValue()) {
                     switch (brick.getType()) {
