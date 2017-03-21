@@ -7,8 +7,6 @@ import static java.lang.String.format;
 import static org.kjkoster.wedo.bricks.Brick.Type.DISTANCE;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 
-import org.kjkoster.wedo.transport.usb.HubHandle;
-
 /**
  * The representation of a single LEGO brick. To be precise, this is the
  * representation of a connector on a hub. Empty spots are represented as bricks
@@ -17,7 +15,6 @@ import org.kjkoster.wedo.transport.usb.HubHandle;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class Brick {
-    private final HubHandle hubHandle;
     private final char port;
 
     private final byte id;
@@ -28,8 +25,6 @@ public class Brick {
     /**
      * Create a new brick representation.
      * 
-     * @param hubHandle
-     *            The hub handle of the hub that this brick is connected to.
      * @param port
      *            The capital letter designating the port on the hub that this
      *            brick is connected to.
@@ -40,23 +35,16 @@ public class Brick {
      * @param value
      *            The value of the value byte that was read from the WeDo hub.
      */
-    public Brick(final HubHandle hubHandle, final char port, final Type type,
-            final byte id, final byte value) {
-        this.hubHandle = checkNotNull(hubHandle);
-        checkArgument(port >= 'A' && port <= 'Z', "invalid port %c", port);
+    public Brick(final char port, final Type type, final byte id,
+            final byte value) {
+        checkArgument(port >= 'A' && port <= 'D', "invalid port %c", port);
         this.port = port;
-        this.type = checkNotNull(type);
+
+        checkNotNull(type);
+        this.type = type;
+
         this.id = id;
         this.value = value;
-    }
-
-    /**
-     * Get the (supposedly opaque) handle for this brick.
-     * 
-     * @return The handle for this brick.
-     */
-    public HubHandle getHubHandle() {
-        return hubHandle;
     }
 
     /**
@@ -152,7 +140,7 @@ public class Brick {
             sensorData = "";
         }
 
-        return format("[%s brick %c: %s id: 0x%02x value: 0x%02x%s]", hubHandle,
-                port, type, id, value, sensorData);
+        return format("[port %c: %s id: 0x%02x value: 0x%02x%s]", port, type,
+                id, value, sensorData);
     }
 }

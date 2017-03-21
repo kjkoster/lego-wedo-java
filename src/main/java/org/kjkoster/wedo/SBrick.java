@@ -7,7 +7,7 @@ import static org.apache.commons.cli.Option.builder;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,9 +17,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
+import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.systems.sbrick.SBricks;
-import org.kjkoster.wedo.transport.usb.HubHandle;
 
 /**
  * The Vengit SBrick and SBrick Plus command line tool's main entry point.
@@ -67,7 +67,7 @@ public class SBrick {
         final File ble112Device = commandLine.hasOption(BLE112DEVICE)
                 ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
-        try (final SBricks sBricks = new SBricks(ble112Device, verbose)) {
+        try (final SBricks sBricks = new SBricks(ble112Device, verbose, hubs)) {
             if (commandLine.hasOption(RESET)) {
                 sBricks.reset();
             } else if (commandLine.hasOption(LIST)) {
@@ -165,14 +165,13 @@ public class SBrick {
         out.printf(
                 "Scanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
-        final Map<HubHandle, Brick[]> hubs = sBricks.readAll();
+        final Collection<Hub> hubs = sBricks.readAll();
         if (hubs.size() == 0) {
-            out.println("No SBricks or SBrick Pluses found.");
+            out.printf("No SBricks or SBrick Pluses found.\n");
         } else {
-            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
-                // we don't show the USB address, it changes a lot.
-                out.println(hub.getKey().getProductName());
-                for (final Brick brick : hub.getValue()) {
+            for (final Hub hub : hubs) {
+                out.printf("%s %s\n", hub.getPath(), hub.getProductName());
+                for (final Brick brick : hub.getBricks()) {
                     listBrick(brick);
                 }
             }
@@ -200,9 +199,8 @@ public class SBrick {
             final boolean showDistance, final boolean showTilt)
             throws InterruptedException {
         while (repeat == -1 || repeat > 0) {
-            final Map<HubHandle, Brick[]> hubs = sBricks.readAll();
-            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
-                for (final Brick brick : hub.getValue()) {
+            for (final Hub hub : sBricks.readAll()) {
+                for (final Brick brick : hub.getBricks()) {
                     switch (brick.getType()) {
                     case DISTANCE:
                         if (showDistance) {

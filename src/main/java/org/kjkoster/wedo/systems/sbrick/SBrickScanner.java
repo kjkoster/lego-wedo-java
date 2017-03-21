@@ -8,15 +8,19 @@ import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.Lombok.sneakyThrow;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
+import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_INTERVAL_MAX;
+import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_INTERVAL_MIN;
+import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_LATENCY;
+import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_TIMEOUT;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.Queue;
 
 import org.kjkoster.wedo.bricks.Brick;
+import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.transport.ble112.BLE112Address;
-import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
@@ -69,7 +73,7 @@ class SBrickScanner extends BGAPIDefaultListener {
     /**
      * The complete and supported SBricks that we found so far.
      */
-    private final Map<HubHandle, Brick[]> foundBricks = new HashMap<>();
+    private final Collection<Hub> foundHubs = new ArrayList<>();
 
     /**
      * Start a new scanner to look for SBricks.
@@ -99,7 +103,7 @@ class SBrickScanner extends BGAPIDefaultListener {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
-    Map<HubHandle, Brick[]> readAll() {
+    Collection<Hub> readAll() {
         // XXX trigger a version report from the BLE112 device.
 
         bgapi.send_gap_set_scan_parameters(10, 250, 1 /* XXX magic numbers */);
@@ -119,7 +123,7 @@ class SBrickScanner extends BGAPIDefaultListener {
             sleep();
         }
 
-        return foundBricks;
+        return foundHubs;
     }
 
     private void connectNextAddress() {
@@ -129,8 +133,8 @@ class SBrickScanner extends BGAPIDefaultListener {
             final BLE112Address ble112Address = ble112Addresses.remove();
             connectedAddress = ble112Address.toString();
             bgapi.send_gap_connect_direct(ble112Address.getBDAddr(),
-                    ble112Address.getAddress_type(), 0x3C, 0x3C, 0x64,
-                    0 /* XXX more magic numbers */);
+                    ble112Address.getAddress_type(), CONN_INTERVAL_MIN,
+                    CONN_INTERVAL_MAX, CONN_TIMEOUT, CONN_LATENCY);
         }
     }
 
@@ -218,14 +222,13 @@ class SBrickScanner extends BGAPIDefaultListener {
             break;
 
         case HANDLE_NAME:
-            final HubHandle handle = new HubHandle(connectedAddress,
-                    format("%s, V%s", new String(value), version));
             final Brick[] bricks = new Brick[4];
             for (int i = 0; i < 4; i++) {
-                bricks[i] = new Brick(handle, (char) ('A' + i), UNKNOWN,
+                bricks[i] = new Brick((char) ('A' + i), UNKNOWN,
                         (byte) 0xff, (byte) 0xff);
             }
-            foundBricks.put(handle, bricks);
+            foundHubs.add(new Hub(connectedAddress,
+                    format("%s, V%s", new String(value), version), bricks));
             bgapi.send_connection_disconnect(connection);
             break;
 

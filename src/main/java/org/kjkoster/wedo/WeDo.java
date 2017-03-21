@@ -6,7 +6,7 @@ import static java.lang.System.out;
 import static org.apache.commons.cli.Option.builder;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,9 +16,9 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Distance;
+import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.systems.wedo.WeDoBricks;
-import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
@@ -174,14 +174,14 @@ public class WeDo {
     private static void list(final boolean verbose) throws IOException {
         out.printf("Scanning for LEGO WeDo hubs...\n\n");
 
-        final Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
+        final Collection<Hub> hubs = weDoBricks.readAll();
         if (hubs.size() == 0) {
             out.println("No LEGO WeDo hubs found.");
         } else {
-            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
+            for (final Hub hub : hubs) {
                 // we don't show the USB address, it changes a lot.
-                out.println(hub.getKey().getProductName());
-                for (final Brick brick : hub.getValue()) {
+                out.println(hub.getProductName());
+                for (final Brick brick : hub.getBricks()) {
                     listBrick(brick);
                 }
             }
@@ -208,9 +208,8 @@ public class WeDo {
     private static void sensor(int repeat, final boolean showDistance,
             final boolean showTilt) throws InterruptedException {
         while (repeat == -1 || repeat > 0) {
-            final Map<HubHandle, Brick[]> hubs = weDoBricks.readAll();
-            for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
-                for (final Brick brick : hub.getValue()) {
+            for (final Hub hub : weDoBricks.readAll()) {
+                for (final Brick brick : hub.getBricks()) {
                     switch (brick.getType()) {
                     case DISTANCE:
                         if (showDistance) {

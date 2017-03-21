@@ -18,6 +18,7 @@ import java.util.Map;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Distance;
+import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.transport.usb.HubHandle;
 import org.kjkoster.wedo.transport.usb.Usb;
@@ -75,37 +76,35 @@ public class WeDoBricks {
      * from each of them. Hubs can be plugged in and out at any time, so it is a
      * surprise how many bricks we get every time.
      * 
-     * @return All the bricks, neatly laid out in a map.
+     * @return All the hubs, with their bricks and values.
      */
-    public Map<HubHandle, Brick[]> readAll() {
-        final Map<HubHandle, Brick[]> bricks = new HashMap<>();
+    public Collection<Hub> readAll() {
+        final Collection<Hub> hubs = new ArrayList<>();
         for (final Map.Entry<HubHandle, byte[]> packetRead : usb.readFromAll()
                 .entrySet()) {
-            bricks.put(packetRead.getKey(),
-                    parseBrickAB(packetRead.getKey(), packetRead.getValue()));
+            hubs.add(parseBrickAB(packetRead.getKey(), packetRead.getValue()));
         }
-        return bricks;
+        return hubs;
     }
 
-    private synchronized Brick[] parseBrickAB(final HubHandle hubHandle,
+    private synchronized Hub parseBrickAB(final HubHandle hubHandle,
             final byte[] buffer) {
         final Brick[] brickAB = new Brick[2];
 
         final Type brickAType = findType(hubHandle, 'A', buffer[3]);
-        brickAB[0] = new Brick(hubHandle, 'A', brickAType, buffer[3],
-                buffer[2]);
+        brickAB[0] = new Brick('A', brickAType, buffer[3], buffer[2]);
         if (verbose) {
             out.println("read  " + brickAB[0]);
         }
 
         final Type brickBType = findType(hubHandle, 'B', buffer[5]);
-        brickAB[1] = new Brick(hubHandle, 'B', brickBType, buffer[5],
-                buffer[4]);
+        brickAB[1] = new Brick('B', brickBType, buffer[5], buffer[4]);
         if (verbose) {
             out.println("read  " + brickAB[1]);
         }
 
-        return brickAB;
+        return new Hub(hubHandle.getPath(), hubHandle.getProductName(),
+                brickAB);
     }
 
     @SuppressWarnings("cast")
@@ -277,36 +276,38 @@ public class WeDoBricks {
             final byte value, final boolean setMotor, final boolean setLight) {
         checkArgument(setA || setB);
 
-        final Map<HubHandle, Brick[]> hubs = readAll();
-        for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
+        for (final Hub hub : readAll()) {
             if (setA) {
-                actuator(hub.getValue()[0], value, setMotor, setLight);
+                actuator(hub, 'A', value, setMotor, setLight);
             }
             if (setB) {
-                actuator(hub.getValue()[1], value, setMotor, setLight);
+                actuator(hub, 'B', value, setMotor, setLight);
             }
         }
     }
 
-    private void actuator(final Brick brick, final byte value,
+    private void actuator(final Hub hub, final char port, final byte value,
             final boolean setMotor, final boolean setLight) {
-        if (setMotor && brick.getType() == MOTOR) {
-            write(brick, value);
+        if (setMotor && hub.getBrick(port).getType() == MOTOR) {
+            write(hub, port, value);
         }
-        if (setLight && brick.getType() == LIGHT) {
-            write(brick, value);
+        if (setLight && hub.getBrick(port).getType() == LIGHT) {
+            write(hub, port, value);
         }
     }
 
-    private synchronized void write(final Brick brick, final byte value) {
+    /**
+     * WeDo only allows us to write both ports at the same time. We look up the
+     * stored value for the second port before writing.
+     */
+    private synchronized void write(final Hub hub, final char port,
+            final byte value) {
         // read the 'other' value
-        final byte otherValue = lookupOtherValue(brick);
-        storeNewValue(brick, value);
+        final byte otherValue = lookupOtherValue(hub, port);
+        storeNewValue(hub, port, value);
 
-        final byte valueA = (byte) ((brick.getPort() == 'A' ? value
-                : otherValue) & 0xff);
-        final byte valueB = (byte) ((brick.getPort() == 'A' ? otherValue
-                : value) & 0xff);
+        final byte valueA = (byte) ((port == 'A' ? value : otherValue) & 0xff);
+        final byte valueB = (byte) ((port == 'A' ? otherValue : value) & 0xff);
         final byte[] buffer = new byte[9];
         buffer[0] = 0x00;
         buffer[1] = 0x40;
@@ -319,33 +320,36 @@ public class WeDoBricks {
         buffer[8] = 0x00;
 
         if (verbose) {
-            out.printf("write %s -> value A: 0x%02x value B: 0x%02x\n", brick,
-                    valueA, valueB);
+            out.printf("write %s -> value A: 0x%02x value B: 0x%02x\n",
+                    hub.getPath(), valueA, valueB);
         }
 
-        usb.write(brick.getHubHandle(), buffer);
+        usb.write(new HubHandle(hub.getPath(), hub.getProductName()), buffer);
     }
 
-    private void storeNewValue(final Brick brick, final byte value) {
-        Map<Character, Byte> hub = rememberedActuatorValues
-                .get(brick.getHubHandle().getPath());
-        if (hub == null) {
-            hub = new HashMap<>();
-            rememberedActuatorValues.put(brick.getHubHandle().getPath(), hub);
+    private void storeNewValue(final Hub hub, final char port,
+            final byte value) {
+        Map<Character, Byte> rememberedActuatorValue = rememberedActuatorValues
+                .get(hub.getPath());
+        if (rememberedActuatorValue == null) {
+            rememberedActuatorValue = new HashMap<>();
+            rememberedActuatorValues.put(hub.getPath(),
+                    rememberedActuatorValue);
         }
 
-        hub.put(brick.getPort(), value);
+        rememberedActuatorValue.put(port, value);
     }
 
-    private byte lookupOtherValue(final Brick brick) {
-        final Map<Character, Byte> hub = rememberedActuatorValues
-                .get(brick.getHubHandle().getPath());
-        if (hub == null) {
+    private byte lookupOtherValue(final Hub hub, final char port) {
+        final Map<Character, Byte> rememberedActuatorValue = rememberedActuatorValues
+                .get(hub.getPath());
+        if (rememberedActuatorValue == null) {
             return (byte) 0x00;
         }
 
         // note that we look up the other port's value
-        final Byte otherValue = hub.get(brick.getPort() == 'A' ? 'B' : 'A');
+        final Byte otherValue = rememberedActuatorValue
+                .get(port == 'A' ? 'B' : 'A');
         if (otherValue == null) {
             return (byte) 0x00;
         }
@@ -357,11 +361,7 @@ public class WeDoBricks {
      * Reset the devices by setting all values to 0.
      */
     public void reset() {
-        final Map<HubHandle, Brick[]> hubs = readAll();
-        for (final Map.Entry<HubHandle, Brick[]> hub : hubs.entrySet()) {
-            write(hub.getValue()[0], (byte) 0x00);
-            write(hub.getValue()[1], (byte) 0x00);
-        }
+        actuator(true, true, (byte) 0x00, true, true);
     }
 
     /**
@@ -371,14 +371,15 @@ public class WeDoBricks {
      */
     public Collection<Distance> readDistances() {
         final Collection<Distance> distances = new ArrayList<>();
-        for (final Brick[] brick : readAll().values()) {
-            if (brick[0].getType() == DISTANCE) {
-                distances.add(brick[0].getDistance());
-            }
-            if (brick[1].getType() == DISTANCE) {
-                distances.add(brick[1].getDistance());
+
+        for (final Hub hub : readAll()) {
+            for (final Brick brick : hub.getBricks()) {
+                if (brick.getType() == DISTANCE) {
+                    distances.add(brick.getDistance());
+                }
             }
         }
+
         return distances;
     }
 
@@ -389,14 +390,15 @@ public class WeDoBricks {
      */
     public Collection<Tilt> readTilts() {
         final Collection<Tilt> tilts = new ArrayList<>();
-        for (final Brick[] brick : readAll().values()) {
-            if (brick[0].getType() == TILT) {
-                tilts.add(brick[0].getTilt());
-            }
-            if (brick[1].getType() == TILT) {
-                tilts.add(brick[1].getTilt());
+
+        for (final Hub hub : readAll()) {
+            for (final Brick brick : hub.getBricks()) {
+                if (brick.getType() == TILT) {
+                    tilts.add(brick.getTilt());
+                }
             }
         }
+
         return tilts;
     }
 }

@@ -1,5 +1,6 @@
 package org.kjkoster.wedo.systems.sbrick;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.out;
 
 import java.io.Closeable;
@@ -8,11 +9,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
 
-import org.kjkoster.wedo.bricks.Brick;
+import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
-import org.kjkoster.wedo.transport.usb.HubHandle;
+import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
 import org.thingml.bglib.BGAPITransport;
@@ -23,7 +27,14 @@ import org.thingml.bglib.BGAPITransport;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class SBricks extends BGAPIDefaultListener implements Closeable {
-    private final File ble112Device;
+    static final int CONN_INTERVAL_MIN = 0x3c; // XXX magic...
+    static final int CONN_INTERVAL_MAX = 0x3c; // XXX magic...
+    static final int CONN_TIMEOUT = 0x64; // XXX magic...
+    static final int CONN_LATENCY = 0x00; // XXX magic...
+    static final int CONN_ADDR_TYPE = 1; // XXX check name and document
+
+    private final List<Hub> hubs = new ArrayList<>();
+
     /**
      * The BGAPI interface.
      */
@@ -34,15 +45,19 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
      *            The device that the BLE112 is represented as on your system.
      * @param verbose
      *            If <code>true</code>, log all BLE messages.
+     * @param hubs
+     *            The definition of all SBrick hubs. Unlike WeDo (for example)
+     *            SBrick's protocol does not have facilities to detect what
+     *            brick is connected on what port of the hub. Instead, we have
+     *            to rely on that information being supplied.
      * @throws FileNotFoundException
      *             When the specified device could not be opened.
      */
-    public SBricks(final File ble112Device, final boolean verbose)
-            throws FileNotFoundException {
+    public SBricks(final File ble112Device, final boolean verbose,
+            final Set<Hub> hubs) throws FileNotFoundException {
         super();
 
-        this.ble112Device = ble112Device;
-        
+        checkNotNull(ble112Device, "null ble112 device");
         final BGAPITransport bgapiTransport = new BGAPITransport(
                 new FileInputStream(ble112Device),
                 new FileOutputStream(ble112Device));
@@ -52,33 +67,16 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
         }
         bgapi.addListener(this);
 
-        if (verbose) {
-            bgapi.send_system_get_info();
+        checkNotNull(hubs, "null hubs");
+        this.hubs.addAll(hubs);
+        if (this.hubs.size() > 0) {
+            // we only connect to the first hub. The response messages will
+            // trigger further connections.
+            bgapi.send_gap_connect_direct(
+                    BDAddr.fromString(this.hubs.get(0).getPath()),
+                    CONN_ADDR_TYPE, CONN_INTERVAL_MIN, CONN_INTERVAL_MAX,
+                    CONN_TIMEOUT, CONN_LATENCY);
         }
-    }
-
-    /**
-     * @see org.thingml.bglib.BGAPIListener#receive_system_boot(int, int, int,
-     *      int, int, int, int)
-     */
-    @Override
-    public void receive_system_boot(int major, int minor, int patch, int build,
-            int ll_version, int protocol_version, int hw) {
-        receive_system_get_info(major, minor, patch, build, ll_version,
-                protocol_version, hw);
-    }
-
-    /**
-     * @see org.thingml.bglib.BGAPIListener#receive_system_get_info(int, int,
-     *      int, int, int, int, int)
-     */
-    @Override
-    public void receive_system_get_info(int major, int minor, int patch,
-            int build, int ll_version, int protocol_version, int hw) {
-        out.printf(
-                "%s: version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d.\n",
-                ble112Device, major, minor, patch, build, ll_version,
-                protocol_version, hw);
     }
 
     /**
@@ -101,9 +99,9 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
      * <p>
      * Best either scan or do regular operations, but not both.
      * 
-     * @return All the bricks, neatly laid out in a map.
+     * @return All the hubs.
      */
-    public Map<HubHandle, Brick[]> readAll() {
+    public Collection<Hub> readAll() {
         final SBrickScanner sbrickScanner = new SBrickScanner(bgapi);
         try {
             bgapi.removeListener(this);
@@ -138,7 +136,8 @@ public class SBricks extends BGAPIDefaultListener implements Closeable {
      *            How fast to run the motor.
      */
     public void motorA(final byte speed) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+        final byte[] data = { 0x01, 0x00, 0x00, (byte) 0xfe };
+        bgapi.send_attclient_attribute_write(connection, 0x001a, data);
     }
 
     /**
