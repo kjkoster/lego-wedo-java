@@ -57,4 +57,26 @@ public class HubHandle {
     public String toString() {
         return path;
     }
+
+    /**
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof HubHandle)) {
+            return false;
+        }
+        return path.equals(((HubHandle) obj).path);
+    }
+
+    /**
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return path.hashCode();
+    }
 }
