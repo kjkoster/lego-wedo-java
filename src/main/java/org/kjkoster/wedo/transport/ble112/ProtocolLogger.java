@@ -690,7 +690,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_reg_write(int)
      */
     @Override
-    public void receive_system_reg_write(int result) {
+    public void receive_system_reg_write(final int result) {
         out.printf("SYSTEM: receive_system_reg_write(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -699,7 +699,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_reg_read(int, int)
      */
     @Override
-    public void receive_system_reg_read(int address, int value) {
+    public void receive_system_reg_read(final int address, final int value) {
         out.printf("SYSTEM: receive_system_reg_read(addres: " + address
                 + ", value: " + value + ")\n");
     }
@@ -709,8 +709,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int)
      */
     @Override
-    public void receive_system_get_counters(int txok, int txretry, int rxok,
-            int rxfail) {
+    public void receive_system_get_counters(final int txok, final int txretry,
+            final int rxok, final int rxfail) {
         out.printf("SYSTEM: receive_system_get_counters(txok: " + txok
                 + ", txretry: " + txretry + ", rxok: " + rxok + ", rxfail: "
                 + rxfail + ")\n");
@@ -720,7 +720,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_get_connections(int)
      */
     @Override
-    public void receive_system_get_connections(int maxconn) {
+    public void receive_system_get_connections(final int maxconn) {
         out.printf("SYSTEM: receive_system_get_connections(maxconn: " + maxconn
                 + ")\n");
     }
@@ -730,7 +730,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_system_read_memory(int address, byte[] data) {
+    public void receive_system_read_memory(final int address,
+            final byte[] data) {
         out.printf(
                 "SYSTEM: receive_system_read_memory(address: %d, data: %s)\n",
                 address, hexDump(data));
@@ -741,8 +742,9 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int, int, int)
      */
     @Override
-    public void receive_system_get_info(int major, int minor, int patch,
-            int build, int ll_version, int protocol_version, int hw) {
+    public void receive_system_get_info(final int major, final int minor,
+            final int patch, final int build, final int ll_version,
+            final int protocol_version, final int hw) {
         out.printf(
                 "SYSTEM: receive_system_get_info(version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d)\n",
                 major, minor, patch, build, ll_version, protocol_version, hw);
@@ -760,7 +762,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_whitelist_append(int)
      */
     @Override
-    public void receive_system_whitelist_append(int result) {
+    public void receive_system_whitelist_append(final int result) {
         out.printf(
                 "SYSTEM: receive_system_whitelist_append(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -770,7 +772,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_whitelist_remove(int)
      */
     @Override
-    public void receive_system_whitelist_remove(int result) {
+    public void receive_system_whitelist_remove(final int result) {
         out.printf(
                 "SYSTEM: receive_system_whitelist_remove(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -789,8 +791,9 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int, int)
      */
     @Override
-    public void receive_system_boot(int major, int minor, int patch, int build,
-            int ll_version, int protocol_version, int hw) {
+    public void receive_system_boot(final int major, final int minor,
+            final int patch, final int build, final int ll_version,
+            final int protocol_version, final int hw) {
         out.printf(
                 "SYSTEM: receive_system_boot(version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d)\n",
                 major, minor, patch, build, ll_version, protocol_version, hw);
@@ -800,7 +803,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_system_debug(byte[])
      */
     @Override
-    public void receive_system_debug(byte[] data) {
+    public void receive_system_debug(final byte[] data) {
         out.printf("SYSTEM: receive_system_debug(data: %s)\n", hexDump(data));
     }
 
@@ -809,7 +812,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_system_endpoint_rx(int endpoint, byte[] data) {
+    public void receive_system_endpoint_rx(final int endpoint,
+            final byte[] data) {
         out.printf(
                 "SYSTEM: receive_system_endpoint_rx(endpoint: %s, data: %s)\n",
                 endpoint, hexDump(data));
@@ -843,7 +847,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_flash_ps_save(int)
      */
     @Override
-    public void receive_flash_ps_save(int result) {
+    public void receive_flash_ps_save(final int result) {
         out.printf("FLASH: receive_flash_ps_save(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -852,7 +856,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_flash_ps_load(int, byte[])
      */
     @Override
-    public void receive_flash_ps_load(int result, byte[] value) {
+    public void receive_flash_ps_load(final int result, final byte[] value) {
         out.printf(
                 "FLASH: receive_flash_ps_load(result: [0x%04x %s], value: %s)\n",
                 result, reasonOrResult(result), hexDump(value));
@@ -870,7 +874,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_flash_erase_page(int)
      */
     @Override
-    public void receive_flash_erase_page(int result) {
+    public void receive_flash_erase_page(final int result) {
         out.printf("FLASH: receive_flash_erase_page(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -887,7 +891,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_flash_ps_key(int, byte[])
      */
     @Override
-    public void receive_flash_ps_key(int key, byte[] value) {
+    public void receive_flash_ps_key(final int key, final byte[] value) {
         out.printf("FLASH: receive_flash_ps_key(key: %d], value: %s)\n", key,
                 hexDump(value));
     }
@@ -896,7 +900,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_attributes_write(int)
      */
     @Override
-    public void receive_attributes_write(int result) {
+    public void receive_attributes_write(final int result) {
         out.printf("ATT: receive_attributes_write(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -906,8 +910,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, byte[])
      */
     @Override
-    public void receive_attributes_read(int handle, int offset, int result,
-            byte[] value) {
+    public void receive_attributes_read(final int handle, final int offset,
+            final int result, final byte[] value) {
         out.printf(
                 "ATT: receive_attributes_read(handle: 0x%04x, offset: %d, result: [0x%04x %s], value: %s)\n",
                 handle, offset, result, reasonOrResult(result), hexDump(value));
@@ -918,8 +922,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, byte[])
      */
     @Override
-    public void receive_attributes_read_type(int handle, int result,
-            byte[] value) {
+    public void receive_attributes_read_type(final int handle, final int result,
+            final byte[] value) {
         out.printf(
                 "ATT: receive_attributes_read_type(handle: 0x%04x, result: [0x%04x %s], value: %s)\n",
                 handle, result, reasonOrResult(result), hexDump(value));
@@ -938,8 +942,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, byte[])
      */
     @Override
-    public void receive_attributes_value(int connection, int reason, int handle,
-            int offset, byte[] value) {
+    public void receive_attributes_value(final int connection, final int reason,
+            final int handle, final int offset, final byte[] value) {
         out.printf(
                 "ATT: receive_attributes_value(connection: %d, reason: [0x%04x %s], handle: 0x%04x, offset: %d, value: %s)\n",
                 connection, reason, reasonOrResult(reason), handle, offset,
@@ -951,8 +955,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int)
      */
     @Override
-    public void receive_attributes_user_request(int connection, int handle,
-            int offset) {
+    public void receive_attributes_user_request(final int connection,
+            final int handle, final int offset) {
         out.printf(
                 "ATT: receive_attributes_user_request(connection: %d, handle: 0x%04x, offset: %d)\n",
                 connection, handle, offset);
@@ -963,7 +967,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_disconnect(int connection, int result) {
+    public void receive_connection_disconnect(final int connection,
+            final int result) {
         out.printf(
                 "CONNECTION: receive_connection_disconnect(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -974,7 +979,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_get_rssi(int connection, int rssi) {
+    public void receive_connection_get_rssi(final int connection,
+            final int rssi) {
         out.printf(
                 "CONNECTION: receive_connection_get_rssi(connection: %d, rssi: %d dBm)\n",
                 connection, rssi);
@@ -984,7 +990,8 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_connection_update(int, int)
      */
     @Override
-    public void receive_connection_update(int connection, int result) {
+    public void receive_connection_update(final int connection,
+            final int result) {
         out.printf(
                 "CONNECTION: receive_connection_update(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -995,7 +1002,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_version_update(int connection, int result) {
+    public void receive_connection_version_update(final int connection,
+            final int result) {
         out.printf(
                 "CONNECTION: receive_connection_version_update(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1006,7 +1014,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_connection_channel_map_get(int connection, byte[] map) {
+    public void receive_connection_channel_map_get(final int connection,
+            final byte[] map) {
         out.printf(
                 "CONNECTION: receive_connection_channel_map_set(connection: %d, map: %s)\n",
                 connection, hexDump(map));
@@ -1017,7 +1026,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_channel_map_set(int connection, int result) {
+    public void receive_connection_channel_map_set(final int connection,
+            final int result) {
         out.printf(
                 "CONNECTION: receive_connection_channel_map_set(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1028,7 +1038,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_features_get(int connection, int result) {
+    public void receive_connection_features_get(final int connection,
+            final int result) {
         out.printf(
                 "CONNECTION: receive_connection_features_get(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1038,7 +1049,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_connection_get_status(int)
      */
     @Override
-    public void receive_connection_get_status(int connection) {
+    public void receive_connection_get_status(final int connection) {
         out.printf(
                 "CONNECTION: receive_connection_get_status(connection: %d)\n",
                 connection);
@@ -1048,7 +1059,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_connection_raw_tx(int)
      */
     @Override
-    public void receive_connection_raw_tx(int connection) {
+    public void receive_connection_raw_tx(final int connection) {
         out.printf("CONNECTION: receive_connection_raw_tx(connection: %d)\n",
                 connection);
     }
@@ -1058,9 +1069,10 @@ public class ProtocolLogger implements BGAPIListener {
      *      org.thingml.bglib.BDAddr, int, int, int, int, int)
      */
     @Override
-    public void receive_connection_status(int connection, int flags,
-            BDAddr address, int address_type, int conn_interval, int timeout,
-            int latency, int bonding) {
+    public void receive_connection_status(final int connection, final int flags,
+            final BDAddr address, final int address_type,
+            final int conn_interval, final int timeout, final int latency,
+            final int bonding) {
         out.printf(
                 "CONNECTION: receive_connection_status(connection: %d, flags: 0x%02x, address: %s, address_type: %s, conn_interval: %d, timeout: %d, latency: %d, bonding: 0x%02x)\n",
                 connection, flags, address, addressType(address_type),
@@ -1072,8 +1084,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int)
      */
     @Override
-    public void receive_connection_version_ind(int connection, int vers_nr,
-            int comp_id, int sub_vers_nr) {
+    public void receive_connection_version_ind(final int connection,
+            final int vers_nr, final int comp_id, final int sub_vers_nr) {
         out.printf(
                 "CONNECTION: receive_connection_version_ind(connection: %d, vers_nr: %d, comp_id: %d, sub_vers_nr: %d)\n",
                 connection, vers_nr, comp_id, sub_vers_nr);
@@ -1084,8 +1096,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_connection_feature_ind(int connection,
-            byte[] features) {
+    public void receive_connection_feature_ind(final int connection,
+            final byte[] features) {
         out.printf(
                 "CONNECTION: receive_connection_feature_ind(connection: %d, features: %s)\n",
                 hexDump(features));
@@ -1096,7 +1108,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_connection_raw_rx(int connection, byte[] data) {
+    public void receive_connection_raw_rx(final int connection,
+            final byte[] data) {
         out.printf(
                 "CONNECTION: receive_connection_raw_rx(connection: %d, data: %s)\n",
                 hexDump(data));
@@ -1107,7 +1120,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_connection_disconnected(int connection, int reason) {
+    public void receive_connection_disconnected(final int connection,
+            final int reason) {
         out.printf(
                 "CONNECTION: receive_connection_disconnected(connection: %d, reason: [0x%04x %s])\n",
                 connection, reason, reasonOrResult(reason));
@@ -1118,8 +1132,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_find_by_type_value(int connection,
-            int result) {
+    public void receive_attclient_find_by_type_value(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_find_by_type_value(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1130,8 +1144,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_read_by_group_type(int connection,
-            int result) {
+    public void receive_attclient_read_by_group_type(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_by_group_type(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1142,7 +1156,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_read_by_type(int connection, int result) {
+    public void receive_attclient_read_by_type(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_by_type(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1153,7 +1168,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_find_information(int connection, int result) {
+    public void receive_attclient_find_information(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_find_information(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1164,7 +1180,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_read_by_handle(int connection, int result) {
+    public void receive_attclient_read_by_handle(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_by_handle(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1175,7 +1192,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_attribute_write(int connection, int result) {
+    public void receive_attclient_attribute_write(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_attribute_write(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1186,7 +1204,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_write_command(int connection, int result) {
+    public void receive_attclient_write_command(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_write_command(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1205,7 +1224,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_read_long(int connection, int result) {
+    public void receive_attclient_read_long(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_long(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1216,7 +1236,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_prepare_write(int connection, int result) {
+    public void receive_attclient_prepare_write(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_prepare_write(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1227,7 +1248,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_execute_write(int connection, int result) {
+    public void receive_attclient_execute_write(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_execute_write(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1238,7 +1260,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_read_multiple(int connection, int result) {
+    public void receive_attclient_read_multiple(final int connection,
+            final int result) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_multiple(connection: %d, result: [0x%04x %s])\n",
                 connection, result, reasonOrResult(result));
@@ -1249,7 +1272,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_attclient_indicated(int connection, int attrhandle) {
+    public void receive_attclient_indicated(final int connection,
+            final int attrhandle) {
         out.printf(
                 "ATTCLIENT: receive_attclient_indicated(connection: %d, attrhandle: 0x%04x)\n",
                 connection, attrhandle);
@@ -1260,8 +1284,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int)
      */
     @Override
-    public void receive_attclient_procedure_completed(int connection,
-            int result, int chrhandle) {
+    public void receive_attclient_procedure_completed(final int connection,
+            final int result, final int chrhandle) {
         out.printf(
                 "ATTCLIENT: receive_attclient_procedure_completed(connection: %d, result: [0x%04x %s], chrhandle: 0x%04x)\n",
                 connection, result, reasonOrResult(result), chrhandle);
@@ -1272,8 +1296,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, byte[])
      */
     @Override
-    public void receive_attclient_group_found(int connection, int start,
-            int end, byte[] uuid) {
+    public void receive_attclient_group_found(final int connection,
+            final int start, final int end, final byte[] uuid) {
         out.printf(
                 "ATTCLIENT: receive_attclient_group_found(connection: %d, start: 0x%04x, end 0x%04x, uuid: %s)\n",
                 connection, start, end, uuid(uuid));
@@ -1284,8 +1308,9 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int, byte[])
      */
     @Override
-    public void receive_attclient_attribute_found(int connection, int chrdecl,
-            int value, int properties, byte[] uuid) {
+    public void receive_attclient_attribute_found(final int connection,
+            final int chrdecl, final int value, final int properties,
+            final byte[] uuid) {
         out.printf(
                 "ATTCLIENT: receive_attclient_attribute_found(connection: %d, chrdecl: %d, value: %d, properties: %d, uuid: %s)\n",
                 connection, chrdecl, value, properties, uuid(uuid));
@@ -1296,8 +1321,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, byte[])
      */
     @Override
-    public void receive_attclient_find_information_found(int connection,
-            int chrhandle, byte[] uuid) {
+    public void receive_attclient_find_information_found(final int connection,
+            final int chrhandle, final byte[] uuid) {
         out.printf(
                 "ATTCLIENT: receive_attclient_find_information_found(connection: %d, chrhandle: 0x%04x, uuid: %s)\n",
                 connection, chrhandle, uuid(uuid));
@@ -1308,8 +1333,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, byte[])
      */
     @Override
-    public void receive_attclient_attribute_value(int connection, int atthandle,
-            int type, byte[] value) {
+    public void receive_attclient_attribute_value(final int connection,
+            final int atthandle, final int type, final byte[] value) {
         out.printf(
                 "ATTCLIENT: receive_attclient_attribute_value(connection: %d, atthandle: 0x%04x, type: %d, value: %s)\n",
                 connection, atthandle, type, hexDump(value));
@@ -1320,8 +1345,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_attclient_read_multiple_response(int connection,
-            byte[] handles) {
+    public void receive_attclient_read_multiple_response(final int connection,
+            final byte[] handles) {
         out.printf(
                 "ATTCLIENT: receive_attclient_read_multiple_response(connection: %d, handles: %s)\n",
                 connection, hexDump(handles));
@@ -1331,7 +1356,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_encrypt_start(int, int)
      */
     @Override
-    public void receive_sm_encrypt_start(int handle, int result) {
+    public void receive_sm_encrypt_start(final int handle, final int result) {
         out.printf(
                 "SM: receive_sm_encrypt_start(handle: 0x%04x, result: [0x%04x %s])\n",
                 handle, result, reasonOrResult(result));
@@ -1349,7 +1374,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_delete_bonding(int)
      */
     @Override
-    public void receive_sm_delete_bonding(int result) {
+    public void receive_sm_delete_bonding(final int result) {
         out.printf("SM: receive_sm_delete_bonding(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1366,7 +1391,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_passkey_entry(int)
      */
     @Override
-    public void receive_sm_passkey_entry(int result) {
+    public void receive_sm_passkey_entry(final int result) {
         out.printf("SM: receive_sm_passkey_entry(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1375,7 +1400,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_get_bonds(int)
      */
     @Override
-    public void receive_sm_get_bonds(int bonds) {
+    public void receive_sm_get_bonds(final int bonds) {
         out.printf("SM: receive_sm_get_bonds(bonds: %d)\n", bonds);
     }
 
@@ -1392,7 +1417,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_sm_smp_data(int handle, int packet, byte[] data) {
+    public void receive_sm_smp_data(final int handle, final int packet,
+            final byte[] data) {
         out.printf(
                 "SM: receive_sm_smp_data(handle: 0x%04x, packet: %d, data: %s)\n",
                 handle, packet, hexDump(data));
@@ -1402,7 +1428,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_bonding_fail(int, int)
      */
     @Override
-    public void receive_sm_bonding_fail(int handle, int result) {
+    public void receive_sm_bonding_fail(final int handle, final int result) {
         out.printf(
                 "SM: receive_sm_bonding_fail(handle: 0x%04x, result: [0x%04x %s])\n",
                 handle, result, reasonOrResult(result));
@@ -1412,7 +1438,8 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_passkey_display(int, int)
      */
     @Override
-    public void receive_sm_passkey_display(int handle, int passkey) {
+    public void receive_sm_passkey_display(final int handle,
+            final int passkey) {
         out.printf(
                 "SM: receive_sm_passkey_display(handle: 0x%04x, passkey: %d)\n",
                 handle, passkey);
@@ -1422,7 +1449,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_sm_passkey_request(int)
      */
     @Override
-    public void receive_sm_passkey_request(int handle) {
+    public void receive_sm_passkey_request(final int handle) {
         out.printf("SM: receive_sm_passkey_request(handle: 0x%04x)\n", handle);
     }
 
@@ -1431,8 +1458,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int)
      */
     @Override
-    public void receive_sm_bond_status(int bond, int keysize, int mitm,
-            int keys) {
+    public void receive_sm_bond_status(final int bond, final int keysize,
+            final int mitm, final int keys) {
         out.printf(
                 "SM: receive_sm_bond_status(bond: %d, keysize: %d, mitm: %d, keys: %d)\n",
                 bond, keysize, mitm, keys);
@@ -1450,7 +1477,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_mode(int)
      */
     @Override
-    public void receive_gap_set_mode(int result) {
+    public void receive_gap_set_mode(final int result) {
         out.printf("GAP: receive_gap_set_mode(result: [0x%04x %s])\n", result,
                 reasonOrResult(result));
     }
@@ -1459,7 +1486,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_discover(int)
      */
     @Override
-    public void receive_gap_discover(int result) {
+    public void receive_gap_discover(final int result) {
         out.printf("GAP: receive_gap_discover(result: [0x%04x %s])\n", result,
                 reasonOrResult(result));
     }
@@ -1468,7 +1495,8 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_connect_direct(int, int)
      */
     @Override
-    public void receive_gap_connect_direct(int result, int connection_handle) {
+    public void receive_gap_connect_direct(final int result,
+            final int connection_handle) {
         out.printf(
                 "GAP: receive_gap_connect_direct(result: [0x%04x %s], connection_handle: %d)\n",
                 result, reasonOrResult(result), connection_handle);
@@ -1478,7 +1506,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_end_procedure(int)
      */
     @Override
-    public void receive_gap_end_procedure(int result) {
+    public void receive_gap_end_procedure(final int result) {
         out.printf("GAP: receive_gap_end_procedure(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1488,8 +1516,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_gap_connect_selective(int result,
-            int connection_handle) {
+    public void receive_gap_connect_selective(final int result,
+            final int connection_handle) {
         out.printf(
                 "GAP: receive_gap_connect_selective(result: [0x%04x %s], connection_handle: %d)\n",
                 result, reasonOrResult(result), connection_handle);
@@ -1499,7 +1527,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_filtering(int)
      */
     @Override
-    public void receive_gap_set_filtering(int result) {
+    public void receive_gap_set_filtering(final int result) {
         out.printf("GAP: receive_gap_set_filtering(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1508,7 +1536,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_scan_parameters(int)
      */
     @Override
-    public void receive_gap_set_scan_parameters(int result) {
+    public void receive_gap_set_scan_parameters(final int result) {
         out.printf(
                 "GAP: receive_gap_set_scan_parameters(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1518,7 +1546,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_adv_parameters(int)
      */
     @Override
-    public void receive_gap_set_adv_parameters(int result) {
+    public void receive_gap_set_adv_parameters(final int result) {
         out.printf("GAP: receive_gap_set_adv_parameters(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1527,7 +1555,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_adv_data(int)
      */
     @Override
-    public void receive_gap_set_adv_data(int result) {
+    public void receive_gap_set_adv_data(final int result) {
         out.printf("GAP: receive_gap_set_adv_data(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1536,7 +1564,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_set_directed_connectable_mode(int)
      */
     @Override
-    public void receive_gap_set_directed_connectable_mode(int result) {
+    public void receive_gap_set_directed_connectable_mode(final int result) {
         out.printf(
                 "GAP: receive_gap_set_directed_connectable_mode(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1547,8 +1575,9 @@ public class ProtocolLogger implements BGAPIListener {
      *      org.thingml.bglib.BDAddr, int, int, byte[])
      */
     @Override
-    public void receive_gap_scan_response(int rssi, int packet_type,
-            BDAddr sender, int address_type, int bond, byte[] data) {
+    public void receive_gap_scan_response(final int rssi, final int packet_type,
+            final BDAddr sender, final int address_type, final int bond,
+            final byte[] data) {
         out.printf(
                 "GAP: receive_gap_scan_response(rssi: %d dBm, packet_type: [0x%02x %s], sender: %s, address_type: %s, bond: 0x%02x, data: %s)\n",
                 rssi, packet_type, packetType(packet_type), sender,
@@ -1559,7 +1588,8 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_gap_mode_changed(int, int)
      */
     @Override
-    public void receive_gap_mode_changed(int discover, int connect) {
+    public void receive_gap_mode_changed(final int discover,
+            final int connect) {
         out.printf("GAP: receive_gap_mode_changed(discover: " + discover
                 + ", connect: " + connect + ")\n");
     }
@@ -1568,7 +1598,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_io_port_config_irq(int)
      */
     @Override
-    public void receive_hardware_io_port_config_irq(int result) {
+    public void receive_hardware_io_port_config_irq(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_config_irq(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1578,7 +1608,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_set_soft_timer(int)
      */
     @Override
-    public void receive_hardware_set_soft_timer(int result) {
+    public void receive_hardware_set_soft_timer(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_set_soft_timer(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1588,7 +1618,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_adc_read(int)
      */
     @Override
-    public void receive_hardware_adc_read(int result) {
+    public void receive_hardware_adc_read(final int result) {
         out.printf("HARDWARE: receive_hardware_adc_read(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
     }
@@ -1597,7 +1627,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_io_port_config_direction(int)
      */
     @Override
-    public void receive_hardware_io_port_config_direction(int result) {
+    public void receive_hardware_io_port_config_direction(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_config_direction(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1607,7 +1637,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_io_port_config_function(int)
      */
     @Override
-    public void receive_hardware_io_port_config_function(int result) {
+    public void receive_hardware_io_port_config_function(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_config_function(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1617,7 +1647,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_io_port_config_pull(int)
      */
     @Override
-    public void receive_hardware_io_port_config_pull(int result) {
+    public void receive_hardware_io_port_config_pull(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_config_pull(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1627,7 +1657,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_io_port_write(int)
      */
     @Override
-    public void receive_hardware_io_port_write(int result) {
+    public void receive_hardware_io_port_write(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_write(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1638,7 +1668,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int)
      */
     @Override
-    public void receive_hardware_io_port_read(int result, int port, int data) {
+    public void receive_hardware_io_port_read(final int result, final int port,
+            final int data) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_read(result: [0x%04x %s], port: %d, data: %d)\n",
                 result, reasonOrResult(result), port, data);
@@ -1648,7 +1679,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_spi_config(int)
      */
     @Override
-    public void receive_hardware_spi_config(int result) {
+    public void receive_hardware_spi_config(final int result) {
         out.printf(
                 "HARDWARE: receive_hardware_spi_config(result: [0x%04x %s])\n",
                 result, reasonOrResult(result));
@@ -1659,8 +1690,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, byte[])
      */
     @Override
-    public void receive_hardware_spi_transfer(int result, int channel,
-            byte[] data) {
+    public void receive_hardware_spi_transfer(final int result,
+            final int channel, final byte[] data) {
         out.printf(
                 "HARDWARE: receive_hardware_spi_transfer(result: [0x%04x %s], channel: %d, data: %s)\n",
                 result, reasonOrResult(result), channel, hexDump(data));
@@ -1671,7 +1702,7 @@ public class ProtocolLogger implements BGAPIListener {
      *      byte[])
      */
     @Override
-    public void receive_hardware_i2c_read(int result, byte[] data) {
+    public void receive_hardware_i2c_read(final int result, final byte[] data) {
         out.printf(
                 "HARDWARE: receive_hardware_i2c_read(result: [0x%04x %s], data: %s)\n",
                 result, reasonOrResult(result), hexDump(data));
@@ -1681,7 +1712,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_i2c_write(int)
      */
     @Override
-    public void receive_hardware_i2c_write(int written) {
+    public void receive_hardware_i2c_write(final int written) {
         out.printf("HARDWARE: receive_hardware_i2c_write(written: %d)\n",
                 written);
     }
@@ -1699,8 +1730,8 @@ public class ProtocolLogger implements BGAPIListener {
      *      int, int, int)
      */
     @Override
-    public void receive_hardware_io_port_status(int timestamp, int port,
-            int irq, int state) {
+    public void receive_hardware_io_port_status(final int timestamp,
+            final int port, final int irq, final int state) {
         out.printf(
                 "HARDWARE: receive_hardware_io_port_status(timestamp: %d, port: %d, irq: %d, state: %d)\n",
                 timestamp, port, irq, state);
@@ -1710,7 +1741,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_hardware_soft_timer(int)
      */
     @Override
-    public void receive_hardware_soft_timer(int handle) {
+    public void receive_hardware_soft_timer(final int handle) {
         out.printf("HARDWARE: receive_hardware_soft_timer(handle: 0x%04x)\n",
                 handle);
     }
@@ -1720,7 +1751,7 @@ public class ProtocolLogger implements BGAPIListener {
      *      int)
      */
     @Override
-    public void receive_hardware_adc_result(int input, int value) {
+    public void receive_hardware_adc_result(final int input, final int value) {
         out.printf(
                 "HARDWARE: receive_hardware_adc_result(input: %d, value: %d)\n",
                 input, value);
@@ -1746,7 +1777,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_test_phy_end(int)
      */
     @Override
-    public void receive_test_phy_end(int counter) {
+    public void receive_test_phy_end(final int counter) {
         out.printf("TEST: receive_test_phy_end(counter: %d)\n", counter);
     }
 
@@ -1762,7 +1793,7 @@ public class ProtocolLogger implements BGAPIListener {
      * @see org.thingml.bglib.BGAPIListener#receive_test_get_channel_map(byte[])
      */
     @Override
-    public void receive_test_get_channel_map(byte[] channel_map) {
+    public void receive_test_get_channel_map(final byte[] channel_map) {
         out.printf("TEST: receive_test_get_channel_map(channel_map: %s)\n",
                 hexDump(channel_map));
     }

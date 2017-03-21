@@ -147,8 +147,9 @@ class SBrickScanner extends BGAPIDefaultListener {
      *      int, org.thingml.bglib.BDAddr, int, int, byte[])
      */
     @Override
-    public void receive_gap_scan_response(int rssi, int packet_type,
-            BDAddr sender, int address_type, int bond, byte[] data) {
+    public void receive_gap_scan_response(final int rssi, final int packet_type,
+            final BDAddr sender, final int address_type, final int bond,
+            final byte[] data) {
         final BLE112Address ble112Address = new BLE112Address(sender,
                 address_type);
         if (!ble112Addresses.contains(ble112Address)) {
@@ -160,7 +161,7 @@ class SBrickScanner extends BGAPIDefaultListener {
      * @see org.thingml.bglib.BGAPIDefaultListener#receive_gap_end_procedure(int)
      */
     @Override
-    public void receive_gap_end_procedure(int result) {
+    public void receive_gap_end_procedure(final int result) {
         connectNextAddress();
     }
 
@@ -169,9 +170,10 @@ class SBrickScanner extends BGAPIDefaultListener {
      *      int, org.thingml.bglib.BDAddr, int, int, int, int, int)
      */
     @Override
-    public void receive_connection_status(int connection, int flags,
-            BDAddr address, int address_type, int conn_interval, int timeout,
-            int latency, int bonding) {
+    public void receive_connection_status(final int connection, final int flags,
+            final BDAddr address, final int address_type,
+            final int conn_interval, final int timeout, final int latency,
+            final int bonding) {
         if (flags != 0x00) {
             // connected, kick off the interrogation
             bgapi.send_attclient_read_by_handle(connection, HANDLE_VENDOR);
@@ -186,7 +188,8 @@ class SBrickScanner extends BGAPIDefaultListener {
      *      int)
      */
     @Override
-    public void receive_connection_disconnected(int connection, int reason) {
+    public void receive_connection_disconnected(final int connection,
+            final int reason) {
         connectNextAddress();
     }
 
@@ -195,8 +198,8 @@ class SBrickScanner extends BGAPIDefaultListener {
      *      int, int, byte[])
      */
     @Override
-    public void receive_attclient_attribute_value(int connection, int atthandle,
-            int type, byte[] value) {
+    public void receive_attclient_attribute_value(final int connection,
+            final int atthandle, final int type, final byte[] value) {
         switch (atthandle) {
         case HANDLE_VENDOR:
             if (!"Vengit Ltd.".equals(new String(value))) {
@@ -244,8 +247,8 @@ class SBrickScanner extends BGAPIDefaultListener {
      *      int, int)
      */
     @Override
-    public void receive_attclient_procedure_completed(int connection,
-            int result, int chrhandle) {
+    public void receive_attclient_procedure_completed(final int connection,
+            final int result, final int chrhandle) {
         bgapi.send_connection_disconnect(connection);
     }
 
@@ -256,7 +259,7 @@ class SBrickScanner extends BGAPIDefaultListener {
      * @see org.thingml.bglib.BGAPIDefaultListener#receive_hardware_adc_read(int)
      */
     @Override
-    public void receive_hardware_adc_read(int result) {
+    public void receive_hardware_adc_read(final int result) {
         bgapi.send_system_reset(0);
         sleep();
         err.println("BLE112 device reported error 0x04x.");
