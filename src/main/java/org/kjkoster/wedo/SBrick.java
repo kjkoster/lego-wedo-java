@@ -221,6 +221,7 @@ public class SBrick {
                     case MOTOR:
                     case LIGHT:
                     case NOT_CONNECTED:
+                    case UNKNOWN:
                         // known not to be sensors
                         break;
                     default:
