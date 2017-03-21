@@ -17,7 +17,6 @@ import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 public class Brick {
     private final char port;
 
-    private final byte id;
     private final Type type;
 
     private final byte value;
@@ -30,20 +29,31 @@ public class Brick {
      *            brick is connected to.
      * @param type
      *            The type of brick.
-     * @param id
-     *            The value of the ID byte that was read from the WeDo hub.
+     */
+    public Brick(final char port, final Type type) {
+        this(port, type, (byte) 0x00);
+    }
+
+    /**
+     * Create a new brick representation.
+     * 
+     * @param port
+     *            The capital letter designating the port on the hub that this
+     *            brick is connected to.
+     * @param type
+     *            The type of brick.
      * @param value
      *            The value of the value byte that was read from the WeDo hub.
      */
-    public Brick(final char port, final Type type, final byte id,
-            final byte value) {
+    public Brick(final char port, final Type type, final byte value) {
+        super();
+
         checkArgument(port >= 'A' && port <= 'D', "invalid port %c", port);
         this.port = port;
 
         checkNotNull(type);
         this.type = type;
 
-        this.id = id;
         this.value = value;
     }
 
@@ -140,7 +150,7 @@ public class Brick {
             sensorData = "";
         }
 
-        return format("[port %c: %s id: 0x%02x value: 0x%02x%s]", port, type,
-                id, value, sensorData);
+        return format("[port %c: %s value: 0x%02x%s]", port, type, value,
+                sensorData);
     }
 }

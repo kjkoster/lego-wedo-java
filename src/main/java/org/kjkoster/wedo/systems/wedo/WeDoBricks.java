@@ -92,13 +92,13 @@ public class WeDoBricks {
         final Brick[] brickAB = new Brick[2];
 
         final Type brickAType = findType(hubHandle, 'A', buffer[3]);
-        brickAB[0] = new Brick('A', brickAType, buffer[3], buffer[2]);
+        brickAB[0] = new Brick('A', brickAType, buffer[2]);
         if (verbose) {
             out.println("read  " + brickAB[0]);
         }
 
         final Type brickBType = findType(hubHandle, 'B', buffer[5]);
-        brickAB[1] = new Brick('B', brickBType, buffer[5], buffer[4]);
+        brickAB[1] = new Brick('B', brickBType, buffer[4]);
         if (verbose) {
             out.println("read  " + brickAB[1]);
         }

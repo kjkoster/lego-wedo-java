@@ -224,8 +224,7 @@ class SBrickScanner extends BGAPIDefaultListener {
         case HANDLE_NAME:
             final Brick[] bricks = new Brick[4];
             for (int i = 0; i < 4; i++) {
-                bricks[i] = new Brick((char) ('A' + i), UNKNOWN,
-                        (byte) 0xff, (byte) 0xff);
+                bricks[i] = new Brick((char) ('A' + i), UNKNOWN);
             }
             foundHubs.add(new Hub(connectedAddress,
                     format("%s, V%s", new String(value), version), bricks));
