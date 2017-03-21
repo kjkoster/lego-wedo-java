@@ -743,9 +743,9 @@ public class ProtocolLogger implements BGAPIListener {
     @Override
     public void receive_system_get_info(int major, int minor, int patch,
             int build, int ll_version, int protocol_version, int hw) {
-        out.printf("SYSTEM: receive_system_get_info(major.minor.patch-build: "
-                + major + "." + minor + "." + patch + "-" + build
-                + ", ll_version: " + ll_version + ", hw: " + hw + ")\n");
+        out.printf(
+                "SYSTEM: receive_system_get_info(version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d)\n",
+                major, minor, patch, build, ll_version, protocol_version, hw);
     }
 
     /**
@@ -791,9 +791,9 @@ public class ProtocolLogger implements BGAPIListener {
     @Override
     public void receive_system_boot(int major, int minor, int patch, int build,
             int ll_version, int protocol_version, int hw) {
-        out.printf("SYSTEM: receive_system_boot(major.minor.patch: " + major
-                + "." + minor + "." + patch + ", build: " + build
-                + ", ll_version: " + ll_version + ", hw: " + hw + ")\n");
+        out.printf(
+                "SYSTEM: receive_system_boot(version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d)\n",
+                major, minor, patch, build, ll_version, protocol_version, hw);
     }
 
     /**
