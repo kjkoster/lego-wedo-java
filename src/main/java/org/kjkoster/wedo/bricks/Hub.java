@@ -41,7 +41,7 @@ public class Hub {
         this.path = path;
 
         checkNotNull(productName, "null product name");
-        checkArgument(productName.trim().equals(path),
+        checkArgument(productName.trim().equals(productName),
                 "product name has whitespace");
         checkArgument(productName.length() > 0, "product name was empty");
         this.productName = productName;
