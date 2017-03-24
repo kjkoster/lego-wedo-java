@@ -1,12 +1,18 @@
 package org.kjkoster.wedo;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Byte.parseByte;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.out;
 import static org.apache.commons.cli.Option.builder;
+import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.commons.cli.CommandLine;
@@ -16,10 +22,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.kjkoster.wedo.bricks.Brick;
+import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Distance;
 import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.bricks.Tilt;
+import org.kjkoster.wedo.systems.sbrick.SBrickScanner;
 import org.kjkoster.wedo.systems.sbrick.SBricks;
+import org.kjkoster.wedo.transport.ble112.BLE112Connections;
+import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
+import org.thingml.bglib.BGAPI;
+import org.thingml.bglib.BGAPITransport;
 
 /**
  * The Vengit SBrick and SBrick Plus command line tool's main entry point.
@@ -57,8 +69,11 @@ public class SBrick {
      *            <code>usage()</code>.
      * @throws ParseException
      *             When the command line could not be parsed.
+     * @throws FileNotFoundException
+     *             When the specified BLE112 device could not be opened.
      */
-    public static void main(final String[] args) throws ParseException {
+    public static void main(final String[] args)
+            throws ParseException, FileNotFoundException {
         final Options options = setOptions();
 
         final CommandLine commandLine = parseCommandLine(options, args);
@@ -67,52 +82,89 @@ public class SBrick {
         final File ble112Device = commandLine.hasOption(BLE112DEVICE)
                 ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
-        try (final SBricks sBricks = new SBricks(ble112Device, verbose, hubs)) {
-            if (commandLine.hasOption(RESET)) {
-                sBricks.reset();
-            } else if (commandLine.hasOption(LIST)) {
-                list(sBricks);
-            } else if (commandLine.hasOption(SENSOR)) {
-                final String value = commandLine.getOptionValue(SENSOR);
-                sensor(sBricks, value == null ? -1 : parseInt(value), true,
-                        true);
-            } else if (commandLine.hasOption(DISTANCE)) {
-                final String value = commandLine.getOptionValue(DISTANCE);
-                sensor(sBricks, value == null ? -1 : parseInt(value), true,
-                        false);
-            } else if (commandLine.hasOption(TILT)) {
-                final String value = commandLine.getOptionValue(TILT);
-                sensor(sBricks, value == null ? -1 : parseInt(value), false,
-                        true);
-            } else if (commandLine.hasOption(MOTOR)) {
-                sBricks.motor(parseByte(commandLine.getOptionValue(MOTOR)));
-            } else if (commandLine.hasOption(MOTOR_A)) {
-                sBricks.motorA(parseByte(commandLine.getOptionValue(MOTOR_A)));
-            } else if (commandLine.hasOption(MOTOR_B)) {
-                sBricks.motorB(parseByte(commandLine.getOptionValue(MOTOR_B)));
-            } else if (commandLine.hasOption(LIGHT)) {
-                sBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
-            } else if (commandLine.hasOption(LIGHT_A)) {
-                sBricks.lightA(parseByte(commandLine.getOptionValue(LIGHT_A)));
-            } else if (commandLine.hasOption(LIGHT_B)) {
-                sBricks.lightB(parseByte(commandLine.getOptionValue(LIGHT_B)));
-            } else if (commandLine.hasOption(ALL)) {
-                sBricks.all(parseByte(commandLine.getOptionValue(ALL)));
-            } else if (commandLine.hasOption(ALL_A)) {
-                sBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
-            } else if (commandLine.hasOption(ALL_B)) {
-                sBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
+        checkNotNull(ble112Device, "null ble112 device");
+        final BGAPITransport bgapiTransport = new BGAPITransport(
+                new FileInputStream(ble112Device),
+                new FileOutputStream(ble112Device));
+        final BGAPI bgapi = new BGAPI(bgapiTransport);
+        if (verbose) {
+            bgapi.addListener(new ProtocolLogger());
+        }
+
+        try {
+            if (commandLine.hasOption(LIST)) {
+                list(bgapi);
             } else {
-                final HelpFormatter formatter = new HelpFormatter();
-                formatter.printHelp("sbrick", options);
-                System.exit(1);
+                final Collection<Hub> hubs = new ArrayList<>();
+                final Brick[] bricks = new Brick[4];
+                bricks[0] = new Brick('A', Type.MOTOR);
+                bricks[1] = new Brick('B', UNKNOWN);
+                bricks[2] = new Brick('C', UNKNOWN);
+                bricks[3] = new Brick('D', UNKNOWN);
+                // XXX get this from the command line...
+                hubs.add(new Hub("0:7:80:d0:52:bf", "SBrick plus", bricks));
+                // hubs.add(
+                // new Hub("00:77:80:2e:43:e4", "SBrick regular", bricks));
+
+                final BLE112Connections ble112Connections = new BLE112Connections(
+                        bgapi);
+                final SBricks sBricks = new SBricks(bgapi, ble112Connections,
+                        hubs);
+
+                Thread.sleep(1000L);
+
+                if (commandLine.hasOption(RESET)) {
+                    sBricks.reset();
+                } else if (commandLine.hasOption(SENSOR)) {
+                    final String value = commandLine.getOptionValue(SENSOR);
+                    sensor(sBricks, value == null ? -1 : parseInt(value), true,
+                            true);
+                } else if (commandLine.hasOption(DISTANCE)) {
+                    final String value = commandLine.getOptionValue(DISTANCE);
+                    sensor(sBricks, value == null ? -1 : parseInt(value), true,
+                            false);
+                } else if (commandLine.hasOption(TILT)) {
+                    final String value = commandLine.getOptionValue(TILT);
+                    sensor(sBricks, value == null ? -1 : parseInt(value), false,
+                            true);
+                } else if (commandLine.hasOption(MOTOR)) {
+                    sBricks.motor(parseByte(commandLine.getOptionValue(MOTOR)));
+                } else if (commandLine.hasOption(MOTOR_A)) {
+                    Thread.sleep(1000L);
+                    sBricks.motorA(
+                            parseByte(commandLine.getOptionValue(MOTOR_A)));
+                    Thread.sleep(1000L);
+                } else if (commandLine.hasOption(MOTOR_B)) {
+                    sBricks.motorB(
+                            parseByte(commandLine.getOptionValue(MOTOR_B)));
+                } else if (commandLine.hasOption(LIGHT)) {
+                    sBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
+                } else if (commandLine.hasOption(LIGHT_A)) {
+                    sBricks.lightA(
+                            parseByte(commandLine.getOptionValue(LIGHT_A)));
+                } else if (commandLine.hasOption(LIGHT_B)) {
+                    sBricks.lightB(
+                            parseByte(commandLine.getOptionValue(LIGHT_B)));
+                } else if (commandLine.hasOption(ALL)) {
+                    sBricks.all(parseByte(commandLine.getOptionValue(ALL)));
+                } else if (commandLine.hasOption(ALL_A)) {
+                    sBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
+                } else if (commandLine.hasOption(ALL_B)) {
+                    sBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
+                } else {
+                    final HelpFormatter formatter = new HelpFormatter();
+                    formatter.printHelp("sbrick", options);
+                    System.exit(1);
+                }
+
+                Thread.sleep(1000L);
             }
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
-            // It seems that under Mac OS X a thread is still stuck in the
-            // BGLIB library, so we force the JVM to exit.
-            System.exit(0);
+            bgapi.listeners.clear();
+            bgapi.send_system_reset(0);
+            bgapi.disconnect();
         }
     }
 
@@ -161,11 +213,12 @@ public class SBrick {
         return commandLineParser.parse(options, arguments);
     }
 
-    private static void list(final SBricks sBricks) throws IOException {
+    private static void list(final BGAPI bgapi) throws IOException {
         out.printf(
                 "Scanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
-        final Collection<Hub> hubs = sBricks.readAll();
+        final SBrickScanner sBrickScanner = new SBrickScanner(bgapi);
+        final Collection<Hub> hubs = sBrickScanner.readAll();
         if (hubs.size() == 0) {
             out.printf("No SBricks or SBrick Pluses found.\n");
         } else {

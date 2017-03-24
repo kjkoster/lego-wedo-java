@@ -7,6 +7,8 @@ import static java.util.Collections.unmodifiableList;
 
 import java.util.List;
 
+import org.kjkoster.wedo.transport.ble112.BLE112Address;
+
 /**
  * A weak pointer to a LEGO hub of some system. Hubs may be plugged in or out at
  * any time. Due to the volatile nature of USB and BLE, we do not actually hand
@@ -19,6 +21,11 @@ import java.util.List;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class Hub {
+    // Bluetooth address_type to use for BLE devices. Possible values are: 1
+    // random address or 0: public address. All devices we support use public
+    // addresses.
+    private static final int CONN_ADDR_TYPE = 0;
+
     private final String path;
     private final String productName;
     private final List<Brick> bricks;
@@ -65,6 +72,16 @@ public class Hub {
     }
 
     /**
+     * Retrieve the hub's address in the form of a BLE112 address, if it is a
+     * BLE112-attached hub.
+     * 
+     * @return The BLE112 address for this hub.
+     */
+    public BLE112Address getBLE112Address() {
+        return new BLE112Address(path, CONN_ADDR_TYPE);
+    }
+
+    /**
      * Find the human readable product name of the hub.
      * 
      * @return The human readable product name.
@@ -91,7 +108,7 @@ public class Hub {
      */
     public Brick getBrick(final char port) {
         checkArgument(port >= 'A' && port < bricks.size(),
-                "no port %c on hub %s", port, path);
+                "no port %s on hub %s", port, path);
         return bricks.get(port - 'A');
     }
 }

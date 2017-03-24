@@ -15,12 +15,65 @@ import com.google.common.hash.HashCode;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class BLE112Address {
-    private final String macString;
     private final byte[] macBytes = new byte[6];
+    private final String macString;
     private final int address_type;
 
     /**
-     * Create a new MAC address from a BGAPI sender.
+     * Create a new MAC address from a MAC tring.
+     * 
+     * @param macBytes
+     *            The sender to take the address from.
+     * @param address_type
+     *            The address type.
+     */
+    public BLE112Address(final byte[] macBytes, final int address_type) {
+        super();
+
+        checkNotNull(macBytes, "null MAC address");
+        checkArgument(macBytes.length == 6, "expected length of 6, found %d",
+                macBytes.length);
+        for (int i = 0; i < 6; i++) {
+            this.macBytes[i] = macBytes[i];
+        }
+
+        this.macString = String.format("%02x:%02x:%02x:%02x:%02x:%02x",
+                macBytes[0], macBytes[1], macBytes[2], macBytes[3], macBytes[4],
+                macBytes[5]);
+
+        checkArgument(address_type == 0 || address_type == 1,
+                "bad address type %d", address_type);
+        this.address_type = address_type;
+    }
+
+    /**
+     * Create a new MAC address from a MAC tring.
+     * 
+     * @param mac
+     *            The sender to take the address from.
+     * @param address_type
+     *            The address type.
+     */
+    public BLE112Address(final String mac, final int address_type) {
+        this(splitBytes(mac), address_type);
+    }
+
+    private static byte[] splitBytes(String mac) {
+        checkNotNull(mac, "null MAC address");
+        final String[] macBytes = mac.split(":");
+        checkArgument(macBytes.length == 6, "expected length of 6, found %d",
+                macBytes.length);
+        final byte[] bytes = new byte[6];
+        for (int i = 0; i < 6; i++) {
+            bytes[i] = (byte) Integer.parseInt(macBytes[i], 16);
+        }
+        return bytes;
+    }
+
+    /**
+     * Create a new MAC address from a BGAPI sender. The internal byte
+     * representation of that class is reversed to match the wire protocol, so
+     * we have to reverse the byte ordering before we can use the data.
      * 
      * @param sender
      *            The sender to take the address from.
@@ -28,18 +81,16 @@ public class BLE112Address {
      *            The address type.
      */
     public BLE112Address(final BDAddr sender, final int address_type) {
-        super();
+        this(reverse(sender.getByteAddr()), address_type);
+    }
 
-        checkNotNull(sender, "null sender");
-        this.macString = sender.toString().intern();
-        // clone the mutable argument into this object
+    private static byte[] reverse(byte[] macBytes) {
+        final byte[] bytes = new byte[6];
         for (int i = 0; i < 6; i++) {
-            macBytes[i] = sender.getByteAddr()[i];
+            bytes[i] = macBytes[5 - i];
         }
+        return bytes;
 
-        checkArgument(address_type == 0 || address_type == 1 || false,
-                "bad address type %d", address_type);
-        this.address_type = address_type;
     }
 
     /**
@@ -53,16 +104,12 @@ public class BLE112Address {
 
     /**
      * Get the BDAddr object that the BGAPI needs. Since that object is mutable
-     * we provide a copy of our MAC address, not the address itself.
+     * we provide a (reversed) copy of our MAC address, not the address itself.
      * 
      * @return A BGAddr that contains the same MAC address as we do.
      */
     public BDAddr getBDAddr() {
-        final byte[] mac = new byte[6];
-        for (int i = 0; i < 6; i++) {
-            mac[i] = macBytes[i];
-        }
-        return new BDAddr(mac);
+        return new BDAddr(reverse(macBytes));
     }
 
     /**
@@ -70,7 +117,9 @@ public class BLE112Address {
      */
     @Override
     public int hashCode() {
-        return macString.hashCode();
+        return macBytes[5] << 41 | macBytes[4] << 33 | macBytes[3] << 25
+                | macBytes[2] << 17 | macBytes[1] << 9 | macBytes[0] << 1
+                | address_type;
     }
 
     /**
@@ -84,7 +133,8 @@ public class BLE112Address {
         if (!(obj instanceof BLE112Address)) {
             return false;
         }
-        return macString.equals(((BLE112Address) obj).macString);
+        return macString.equals(((BLE112Address) obj).macString)
+                && address_type == ((BLE112Address) obj).address_type;
     }
 
     /**

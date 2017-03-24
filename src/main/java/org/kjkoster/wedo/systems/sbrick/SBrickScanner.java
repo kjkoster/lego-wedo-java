@@ -8,10 +8,10 @@ import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.Lombok.sneakyThrow;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
-import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_INTERVAL_MAX;
-import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_INTERVAL_MIN;
-import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_LATENCY;
-import static org.kjkoster.wedo.systems.sbrick.SBricks.CONN_TIMEOUT;
+import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_INTERVAL_MAX;
+import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_INTERVAL_MIN;
+import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_LATENCY;
+import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_TIMEOUT;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -35,7 +35,7 @@ import org.thingml.bglib.BGAPIDefaultListener;
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-class SBrickScanner extends BGAPIDefaultListener {
+public class SBrickScanner extends BGAPIDefaultListener {
     private static final int HANDLE_VENDOR = 0x10;
     private static final int HANDLE_VERSION = 0x0a;
     private static final int HANDLE_NAME = 0x03;
@@ -51,17 +51,10 @@ class SBrickScanner extends BGAPIDefaultListener {
     private final Queue<BLE112Address> ble112Addresses = new LinkedList<>();
 
     /**
-     * A flag indicating that we are done interrogating. This flag is switched
-     * to <code>true</code> when the last SBrick has been added to the found
-     * bricks.
-     */
-    private volatile boolean done = false;
-
-    /**
      * The address of the peripheral that we are currently connected to. Used
      * during the interrogation process to remember the address across messages.
      */
-    private String connectedAddress = "";
+    private BLE112Address connectedAddress = null;
 
     /**
      * The firmware version of the peripheral that we are currently connected
@@ -81,10 +74,11 @@ class SBrickScanner extends BGAPIDefaultListener {
      * @param bgapi
      *            The BLE112 API to use.
      */
-    SBrickScanner(final BGAPI bgapi) {
+    public SBrickScanner(final BGAPI bgapi) {
         super();
 
         this.bgapi = bgapi;
+        bgapi.addListener(this);
     }
 
     private void sleep() {
@@ -103,7 +97,7 @@ class SBrickScanner extends BGAPIDefaultListener {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
-    Collection<Hub> readAll() {
+    public Collection<Hub> readAll() {
         // XXX trigger a version report from the BLE112 device.
 
         bgapi.send_gap_set_scan_parameters(10, 250, 1 /* XXX magic numbers */);
@@ -119,19 +113,18 @@ class SBrickScanner extends BGAPIDefaultListener {
         }
 
         // wait for the addresses to all be interrogated
-        while (!done) {
+        while (!ble112Addresses.isEmpty()) {
             sleep();
         }
+        sleep();
 
         return foundHubs;
     }
 
     private void connectNextAddress() {
-        if (ble112Addresses.isEmpty()) {
-            done = true;
-        } else {
+        if (!ble112Addresses.isEmpty()) {
             final BLE112Address ble112Address = ble112Addresses.remove();
-            connectedAddress = ble112Address.toString();
+            connectedAddress = ble112Address;
             bgapi.send_gap_connect_direct(ble112Address.getBDAddr(),
                     ble112Address.getAddress_type(), CONN_INTERVAL_MIN,
                     CONN_INTERVAL_MAX, CONN_TIMEOUT, CONN_LATENCY);
@@ -229,7 +222,7 @@ class SBrickScanner extends BGAPIDefaultListener {
             for (int i = 0; i < 4; i++) {
                 bricks[i] = new Brick((char) ('A' + i), UNKNOWN);
             }
-            foundHubs.add(new Hub(connectedAddress,
+            foundHubs.add(new Hub(connectedAddress.toString(),
                     format("%s, V%s", new String(value), version), bricks));
             bgapi.send_connection_disconnect(connection);
             break;
