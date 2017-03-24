@@ -107,8 +107,9 @@ public class Hub {
      * @return The port's brick.
      */
     public Brick getBrick(final char port) {
-        checkArgument(port >= 'A' && port < bricks.size(),
+        final int portIndex = port - 'A';
+        checkArgument(portIndex >= 0 && portIndex < bricks.size(),
                 "no port %s on hub %s", port, path);
-        return bricks.get(port - 'A');
+        return bricks.get(portIndex);
     }
 }
