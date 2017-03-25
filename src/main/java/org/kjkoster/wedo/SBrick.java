@@ -3,7 +3,9 @@ package org.kjkoster.wedo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Byte.parseByte;
 import static java.lang.System.out;
-import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
+import static org.apache.commons.cli.Option.builder;
+import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
+import static org.kjkoster.wedo.bricks.Brick.Type.NOT_CONNECTED;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,6 +39,7 @@ import org.thingml.bglib.BGAPITransport;
 public class SBrick {
     private static final String VERBOSE = "v";
     private static final String BLE112DEVICE = "ble112";
+    private static final String HUB = "hub";
 
     private static final String RESET = "reset";
     private static final String LIST = "list";
@@ -94,15 +97,7 @@ public class SBrick {
                 list(bgapi);
             } else {
                 final Collection<Hub> hubs = new ArrayList<>();
-                final Brick[] bricks = new Brick[4];
-                bricks[0] = new Brick('A', Type.LIGHT);
-                bricks[1] = new Brick('B', UNKNOWN);
-                bricks[2] = new Brick('C', UNKNOWN);
-                bricks[3] = new Brick('D', Type.MOTOR);
-                // XXX get this from the command line...
-                hubs.add(new Hub("0:7:80:d0:52:bf", "SBrick plus", bricks));
-                // hubs.add(
-                // new Hub("00:77:80:2e:43:e4", "SBrick regular", bricks));
+                hubs.add(parseBrick(commandLine.getOptionValue(HUB)));
 
                 final BLE112Connections ble112Connections = new BLE112Connections(
                         bgapi);
@@ -170,12 +165,33 @@ public class SBrick {
         }
     }
 
+    static Hub parseBrick(final String hubSpec) {
+        final String[] parts = hubSpec.split(",");
+
+        final Brick[] bricks = new Brick[4];
+        for (int i = 0; i < 4; i++) {
+            final char port = (char) (FIRST_PORT + i);
+            final int partsI = i + 1;
+            if (partsI >= parts.length || parts[partsI].length() == 0) {
+                bricks[i] = new Brick(port, NOT_CONNECTED);
+            } else {
+                bricks[i] = new Brick(port,
+                        Type.valueOf(parts[partsI].toUpperCase()));
+            }
+        }
+
+        return new Hub(parts[0], "SBrick", bricks);
+    }
+
     private static Options setOptions() {
         final Options options = new Options();
 
         options.addOption(VERBOSE, "verbose output");
         options.addOption(BLE112DEVICE, true,
                 "the file path to your BLE112 dongle. On Mac OS X, this is typically /dev/cu.usbmodem1");
+        options.addOption(builder(HUB).required().hasArg()
+                .desc("specify the hub's MAC address and port assignment. E.g. -hub 00:77:80:2e:43:e4,MOTOR,,LIGHT")
+                .build());
 
         options.addOption(RESET, "reset all bricks");
         options.addOption(LIST, "list SBricks and SBrick Pluses");
