@@ -185,17 +185,29 @@ public class SBrick {
                 "set all motor A's to speed (-127 to 127, 0 is off, negative for reverse)");
         options.addOption(MOTOR_B, true,
                 "set all motor B's to speed (-127 to 127, 0 is off, negative for reverse)");
+        options.addOption(MOTOR_C, true,
+                "set all motor C's to speed (-127 to 127, 0 is off, negative for reverse)");
+        options.addOption(MOTOR_D, true,
+                "set all motor D's to speed (-127 to 127, 0 is off, negative for reverse)");
         options.addOption(LIGHT, true,
                 "set all lights to intensity (0 to 127, 0 is off)");
         options.addOption(LIGHT_A, true,
                 "set all brick A lights to intensity (0 to 127, 0 is off)");
         options.addOption(LIGHT_B, true,
                 "set all brick B lights to intensity (0 to 127, 0 is off)");
+        options.addOption(LIGHT_C, true,
+                "set all brick C lights to intensity (0 to 127, 0 is off)");
+        options.addOption(LIGHT_D, true,
+                "set all brick D lights to intensity (0 to 127, 0 is off)");
         options.addOption(ALL, true, "set all bricks to value (-127 to 127)");
         options.addOption(ALL_A, true,
                 "set all brick A's to speed (-127 to 127)");
         options.addOption(ALL_B, true,
                 "set all brick B's to speed (-127 to 127)");
+        options.addOption(ALL_C, true,
+                "set all brick C's to speed (-127 to 127)");
+        options.addOption(ALL_D, true,
+                "set all brick D's to speed (-127 to 127)");
 
         return options;
     }
