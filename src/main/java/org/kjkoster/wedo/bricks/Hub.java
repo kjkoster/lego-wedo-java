@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableList;
+import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class Hub {
 
         checkArgument(
                 bricks.length == 2/* WeDo */ || bricks.length == 4 /* SBrick */,
-                "unexpected number of bricks (expected 2 or 4, found %d)",
+                "unexpected number of bricks (expected 2 or 4, found %s)",
                 bricks.length);
         this.bricks = unmodifiableList(asList(bricks));
     }
@@ -107,7 +108,7 @@ public class Hub {
      * @return The port's brick.
      */
     public Brick getBrick(final char port) {
-        final int portIndex = port - 'A';
+        final int portIndex = port - FIRST_PORT;
         checkArgument(portIndex >= 0 && portIndex < bricks.size(),
                 "no port %s on hub %s", port, path);
         return bricks.get(portIndex);

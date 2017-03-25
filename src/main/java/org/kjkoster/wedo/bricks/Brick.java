@@ -15,10 +15,19 @@ import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class Brick {
+    /**
+     * The first port on all bricks.
+     */
+    public static final char FIRST_PORT = 'A';
+
+    /**
+     * Each system has its own port limit, but the overall port range is limited
+     * by <code>MAX_PORT</code>.
+     */
+    public static final char MAX_PORT = 'D';
+
     private final char port;
-
     private final Type type;
-
     private final byte value;
 
     /**
@@ -48,7 +57,8 @@ public class Brick {
     public Brick(final char port, final Type type, final byte value) {
         super();
 
-        checkArgument(port >= 'A' && port <= 'D', "invalid port %c", port);
+        checkArgument(port >= FIRST_PORT && port <= MAX_PORT, "invalid port %s",
+                port);
         this.port = port;
 
         checkNotNull(type);

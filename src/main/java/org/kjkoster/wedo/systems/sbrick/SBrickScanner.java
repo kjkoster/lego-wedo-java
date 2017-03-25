@@ -7,6 +7,7 @@ import static java.lang.System.exit;
 import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static lombok.Lombok.sneakyThrow;
+import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_INTERVAL_MAX;
 import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_INTERVAL_MIN;
@@ -220,7 +221,7 @@ public class SBrickScanner extends BGAPIDefaultListener {
         case HANDLE_NAME:
             final Brick[] bricks = new Brick[4];
             for (int i = 0; i < 4; i++) {
-                bricks[i] = new Brick((char) ('A' + i), UNKNOWN);
+                bricks[i] = new Brick((char) (FIRST_PORT + i), UNKNOWN);
             }
             foundHubs.add(new Hub(connectedAddress.toString(),
                     format("%s, V%s", new String(value), version), bricks));

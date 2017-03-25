@@ -1,7 +1,11 @@
 package org.kjkoster.wedo.systems.sbrick;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.System.out;
+import static java.lang.Math.abs;
+import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
+import static org.kjkoster.wedo.bricks.Brick.MAX_PORT;
+import static org.kjkoster.wedo.bricks.Brick.Type.LIGHT;
 import static org.kjkoster.wedo.bricks.Brick.Type.MOTOR;
 
 import java.io.FileNotFoundException;
@@ -9,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.kjkoster.wedo.bricks.Brick;
+import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.transport.ble112.BLE112Connections;
 import org.thingml.bglib.BGAPI;
@@ -63,15 +69,17 @@ public class SBricks extends BGAPIDefaultListener {
      * Reset the BLE112 device.
      */
     public void reset() {
-        bgapi.send_system_reset(0);
+        actuator(null, null, (byte) 0x00);
     }
 
     /**
-     * @see org.thingml.bglib.BGAPIDefaultListener#receive_system_reset()
+     * Run the motor on all ports.
+     * 
+     * @param speed
+     *            How fast to run the motor.
      */
-    @Override
-    public void receive_system_reset() {
-        out.printf("BLE112 reset.\n");
+    public void motor(final byte speed) {
+        actuator(null, MOTOR, speed);
     }
 
     /**
@@ -81,50 +89,119 @@ public class SBricks extends BGAPIDefaultListener {
      *            How fast to run the motor.
      */
     public void motorA(final byte speed) {
-        final byte[] data = { 0x01, 0x00, 0x00, (byte) 0xfe };
+        actuator('A', MOTOR, speed);
+    }
+
+    /**
+     * Run the motor on port B.
+     * 
+     * @param speed
+     *            How fast to run the motor.
+     */
+    public void motorB(final byte speed) {
+        actuator('B', MOTOR, speed);
+    }
+
+    /**
+     * Light the light on all ports.
+     * 
+     * @param intensity
+     *            How bright to light up.
+     */
+    public void light(final byte intensity) {
+        actuator(null, LIGHT, intensity);
+    }
+
+    /**
+     * Light the light on port A.
+     * 
+     * @param intensity
+     *            How bright to light up.
+     */
+    public void lightA(final byte intensity) {
+        actuator('A', LIGHT, intensity);
+    }
+
+    /**
+     * Light the light on port B.
+     * 
+     * @param intensity
+     *            How bright to light up.
+     */
+    public void lightB(final byte intensity) {
+        actuator('B', LIGHT, intensity);
+    }
+
+    /**
+     * Run all actuators on all ports.
+     * 
+     * @param value
+     *            How hard to drive the actuators.
+     */
+    public void all(final byte value) {
+        actuator(null, null, value);
+    }
+
+    /**
+     * Run all actuators on port A.
+     * 
+     * @param value
+     *            How hard to drive the actuators.
+     */
+    public void allA(final byte value) {
+        actuator('A', null, value);
+    }
+
+    /**
+     * Run all actuators on port B.
+     * 
+     * @param value
+     *            How hard to drive the actuators.
+     */
+    public void allB(final byte value) {
+        actuator('B', null, value);
+    }
+
+    /**
+     * Set the specified actuator to the provided speed or light intensity. The
+     * port and type are used as filter to identify what brick to address.
+     * 
+     * @param port
+     *            The port to select, or <code>null</code> to select any port.
+     * @param type
+     *            The brick type to select, or <code>null</code> to select any
+     *            brick type.
+     * @param value
+     *            The speed or intensity value to set the brick to.
+     */
+    private void actuator(final Character port, final Type type,
+            final byte value) {
+        checkArgument(port == null || (port >= FIRST_PORT && port <= MAX_PORT),
+                "invalid port %s", port);
 
         for (final Hub hub : hubs) {
             final Integer connection = ble112Connections
                     .getConnection(hub.getBLE112Address());
-            if (connection != null && hub.getBrick('A').getType() == MOTOR) {
-                bgapi.send_attclient_attribute_write(connection, 0x001a, data);
+            if (connection != null) {
+                actuator(connection, hub, port, type, value);
             }
         }
     }
 
-    public void motor(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
+    private void actuator(final int connection, final Hub hub,
+            final Character port, final Type type, final byte value) {
+        for (final Brick brick : hub.getBricks()) {
+            if ((port == null || port.equals(brick.getPort()))
+                    && (type == null || type.equals(brick.getType()))) {
+                final byte data_direction = value < 0 ? (byte) 0x01
+                        : (byte) 0x00;
+                final byte data_port = (byte) (brick.getPort() - FIRST_PORT);
+                final byte data_value = (byte) (abs(value * 2) & 0xff);
 
-    public void motorB(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void light(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void lightA(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void lightB(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void all(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void allA(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public void allB(byte parseByte) {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
-    }
-
-    public Collection<Hub> readAll() {
-        throw new Error("NOT IMPLEMENTED..."); // TODO
+                final byte[] data = { 0x01, data_port, data_direction,
+                        data_value };
+                bgapi.send_attclient_attribute_write(connection, 0x001a, data);
+            }
+        }
     }
 }
