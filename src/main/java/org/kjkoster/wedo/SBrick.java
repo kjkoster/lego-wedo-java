@@ -44,14 +44,20 @@ public class SBrick {
     private static final String ALL = "all";
     private static final String ALL_A = "allA";
     private static final String ALL_B = "allB";
+    private static final String ALL_C = "allC";
+    private static final String ALL_D = "allD";
 
     private static final String LIGHT = "light";
     private static final String LIGHT_A = "lightA";
     private static final String LIGHT_B = "lightB";
+    private static final String LIGHT_C = "lightC";
+    private static final String LIGHT_D = "lightD";
 
     private static final String MOTOR = "motor";
     private static final String MOTOR_A = "motorA";
     private static final String MOTOR_B = "motorB";
+    private static final String MOTOR_C = "motorC";
+    private static final String MOTOR_D = "motorD";
 
     /**
      * The main application entry point.
@@ -117,6 +123,12 @@ public class SBrick {
                 } else if (commandLine.hasOption(MOTOR_B)) {
                     sBricks.motorB(
                             parseByte(commandLine.getOptionValue(MOTOR_B)));
+                } else if (commandLine.hasOption(MOTOR_C)) {
+                    sBricks.motorC(
+                            parseByte(commandLine.getOptionValue(MOTOR_C)));
+                } else if (commandLine.hasOption(MOTOR_D)) {
+                    sBricks.motorD(
+                            parseByte(commandLine.getOptionValue(MOTOR_D)));
                 } else if (commandLine.hasOption(LIGHT)) {
                     sBricks.light(parseByte(commandLine.getOptionValue(LIGHT)));
                 } else if (commandLine.hasOption(LIGHT_A)) {
@@ -125,12 +137,22 @@ public class SBrick {
                 } else if (commandLine.hasOption(LIGHT_B)) {
                     sBricks.lightB(
                             parseByte(commandLine.getOptionValue(LIGHT_B)));
+                } else if (commandLine.hasOption(LIGHT_C)) {
+                    sBricks.lightC(
+                            parseByte(commandLine.getOptionValue(LIGHT_C)));
+                } else if (commandLine.hasOption(LIGHT_D)) {
+                    sBricks.lightD(
+                            parseByte(commandLine.getOptionValue(LIGHT_D)));
                 } else if (commandLine.hasOption(ALL)) {
                     sBricks.all(parseByte(commandLine.getOptionValue(ALL)));
                 } else if (commandLine.hasOption(ALL_A)) {
                     sBricks.allA(parseByte(commandLine.getOptionValue(ALL_A)));
                 } else if (commandLine.hasOption(ALL_B)) {
                     sBricks.allB(parseByte(commandLine.getOptionValue(ALL_B)));
+                } else if (commandLine.hasOption(ALL_C)) {
+                    sBricks.allC(parseByte(commandLine.getOptionValue(ALL_C)));
+                } else if (commandLine.hasOption(ALL_D)) {
+                    sBricks.allD(parseByte(commandLine.getOptionValue(ALL_D)));
                 } else {
                     final HelpFormatter formatter = new HelpFormatter();
                     formatter.printHelp("sbrick", options);

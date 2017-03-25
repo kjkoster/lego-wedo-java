@@ -103,6 +103,26 @@ public class SBricks extends BGAPIDefaultListener {
     }
 
     /**
+     * Run the motor on port C.
+     * 
+     * @param speed
+     *            How fast to run the motor.
+     */
+    public void motorC(final byte speed) {
+        actuator('C', MOTOR, speed);
+    }
+
+    /**
+     * Run the motor on port D.
+     * 
+     * @param speed
+     *            How fast to run the motor.
+     */
+    public void motorD(final byte speed) {
+        actuator('D', MOTOR, speed);
+    }
+
+    /**
      * Light the light on all ports.
      * 
      * @param intensity
@@ -133,6 +153,26 @@ public class SBricks extends BGAPIDefaultListener {
     }
 
     /**
+     * Light the light on port C.
+     * 
+     * @param intensity
+     *            How bright to light up.
+     */
+    public void lightC(final byte intensity) {
+        actuator('C', LIGHT, intensity);
+    }
+
+    /**
+     * Light the light on port D.
+     * 
+     * @param intensity
+     *            How bright to light up.
+     */
+    public void lightD(final byte intensity) {
+        actuator('D', LIGHT, intensity);
+    }
+
+    /**
      * Run all actuators on all ports.
      * 
      * @param value
@@ -160,6 +200,26 @@ public class SBricks extends BGAPIDefaultListener {
      */
     public void allB(final byte value) {
         actuator('B', null, value);
+    }
+
+    /**
+     * Run all actuators on port C.
+     * 
+     * @param value
+     *            How hard to drive the actuators.
+     */
+    public void allC(final byte value) {
+        actuator('C', null, value);
+    }
+
+    /**
+     * Run all actuators on port D.
+     * 
+     * @param value
+     *            How hard to drive the actuators.
+     */
+    public void allD(final byte value) {
+        actuator('D', null, value);
     }
 
     /**
