@@ -274,7 +274,7 @@ public class SBrickScanner extends BGAPIDefaultListener {
     public void receive_hardware_adc_read(final int result) {
         bgapi.send_system_reset(0);
         sleep();
-        err.println("BLE112 device reported error 0x04x.");
+        err.printf("BLE112 device reported error 0x%04x.\n", result);
         exit(1);
     }
 }
