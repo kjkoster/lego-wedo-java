@@ -37,6 +37,23 @@ import org.thingml.bglib.BGAPIDefaultListener;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class SBrickScanner extends BGAPIDefaultListener {
+    /**
+     * At what intervals is scanner started. This value is measured in 625 us
+     * units and has a range from 20 ms to 10240 ms.
+     */
+    private static final int SCAN_INTERVAL = 10;
+
+    /**
+     * How long to scan at each interval, unit is 625us. Must be equal or
+     * smaller than the value of the scan interval.
+     */
+    private static final int SCAN_WINDOW = 250;
+
+    /**
+     * Use active scanning (value 1) or passive scanning (value 0).
+     */
+    private static final int SCAN_ACTIVE = 1;
+
     private static final int HANDLE_VENDOR = 0x10;
     private static final int HANDLE_VERSION = 0x0a;
     private static final int HANDLE_NAME = 0x03;
@@ -101,7 +118,8 @@ public class SBrickScanner extends BGAPIDefaultListener {
     public Collection<Hub> readAll() {
         // XXX trigger a version report from the BLE112 device.
 
-        bgapi.send_gap_set_scan_parameters(10, 250, 1 /* XXX magic numbers */);
+        bgapi.send_gap_set_scan_parameters(SCAN_INTERVAL, SCAN_WINDOW,
+                SCAN_ACTIVE);
         bgapi.send_gap_discover(1 /* gap_discover_generic */);
 
         try {

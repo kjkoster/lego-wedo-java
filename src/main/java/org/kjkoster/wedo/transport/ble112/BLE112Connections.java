@@ -18,10 +18,31 @@ import org.thingml.bglib.BGAPIDefaultListener;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class BLE112Connections extends BGAPIDefaultListener {
-    public static final int CONN_INTERVAL_MIN = 0x3c; // XXX magic...
-    public static final int CONN_INTERVAL_MAX = 0x3c; // XXX magic...
-    public static final int CONN_TIMEOUT = 0x64; // XXX magic...
-    public static final int CONN_LATENCY = 0x00; // XXX magic...
+    /**
+     * The minimum connection event interval. This value is measured in 1.25 ms
+     * units and has a range of 7.5 ms to 4 seconds.
+     */
+    public static final int CONN_INTERVAL_MIN = 0x3c;
+
+    /**
+     * The maximum connection event interval. This value is measured in 1.25 ms
+     * units and has a range of 7.5 ms to 4 seconds.
+     */
+    public static final int CONN_INTERVAL_MAX = 0x3c;
+
+    /**
+     * The connection's supervisor timeout. Shall be greater than the maximum
+     * connection interval. This value is measured in 10 ms units and has a
+     * range of 100 ms to 32 seconds.
+     */
+    public static final int CONN_TIMEOUT = 0x64;
+
+    /**
+     * Defines how many connection intervals the slave can skip. Setting this to
+     * 0x00 prevents slave from skipping connection intervals on purpose. It has
+     * a range of 0 to 500 events.
+     */
+    public static final int CONN_LATENCY = 0x00;
 
     private final BGAPI bgapi;
     private final Map<BLE112Address, Integer> connections = new HashMap<>();
