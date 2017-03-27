@@ -7,6 +7,8 @@ import static java.lang.String.format;
 import static org.kjkoster.wedo.bricks.Brick.Type.DISTANCE;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 
+import lombok.Value;
+
 /**
  * The representation of a single LEGO brick. To be precise, this is the
  * representation of a connector on a hub. Empty spots are represented as bricks
@@ -14,6 +16,7 @@ import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
+@Value
 public class Brick {
     /**
      * The first port on all bricks.
@@ -68,15 +71,6 @@ public class Brick {
     }
 
     /**
-     * Find what port this brick is connected to.
-     * 
-     * @return The port that this brick is connected to, as a capital letter.
-     */
-    public char getPort() {
-        return port;
-    }
-
-    /**
      * The WeDo brick types that we know of, plus a few internal ones to make
      * the code simpler.
      */
@@ -110,15 +104,6 @@ public class Brick {
          * Something unknown is connected at this connector.
          */
         UNKNOWN
-    }
-
-    /**
-     * Find the type of the brick that is connected at this place.
-     * 
-     * @return The brick's type.
-     */
-    public Type getType() {
-        return type;
     }
 
     /**

@@ -7,6 +7,8 @@ import static org.kjkoster.wedo.bricks.Tilt.Direction.LEFT;
 import static org.kjkoster.wedo.bricks.Tilt.Direction.NO_TILT;
 import static org.kjkoster.wedo.bricks.Tilt.Direction.RIGHT;
 
+import lombok.Value;
+
 /**
  * The representation of a single sample from a tilt sensor. These directions
  * are taken with the wire of the sensor facing towards you.
@@ -18,27 +20,9 @@ import static org.kjkoster.wedo.bricks.Tilt.Direction.RIGHT;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
+@Value
 public class Tilt {
     private final byte value;
-
-    /**
-     * Create a new tilt sensor sample.
-     * 
-     * @param value
-     *            The raw tilt sensor value.
-     */
-    public Tilt(final byte value) {
-        this.value = value;
-    }
-
-    /**
-     * Find the byte value of the tilt, as read from the LEGO WeDo hub.
-     * 
-     * @return The tilt's byte value.
-     */
-    public byte getValue() {
-        return value;
-    }
 
     /**
      * The tilt directions.
@@ -96,15 +80,7 @@ public class Tilt {
         if (tilt > 203 && tilt < 240) {
             return LEFT;
         }
-        throw new IllegalArgumentException(format("unknown tilt value 0x%02x",
-                value));
-    }
-
-    /**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-        return format("[tilt 0x%02x %s]", value, getDirection());
+        throw new IllegalArgumentException(
+                format("unknown tilt value 0x%02x", value));
     }
 }

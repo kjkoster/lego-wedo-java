@@ -5,8 +5,9 @@ import static java.lang.String.format;
 import static java.lang.System.err;
 import static java.lang.System.exit;
 import static java.lang.System.out;
+import static java.lang.Thread.sleep;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
-import static lombok.Lombok.sneakyThrow;
 import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.UNKNOWN;
 import static org.kjkoster.wedo.transport.ble112.BLE112Connections.CONN_INTERVAL_MAX;
@@ -25,6 +26,8 @@ import org.kjkoster.wedo.transport.ble112.BLE112Address;
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
+
+import lombok.SneakyThrows;
 
 /**
  * A scanner that searches for SBrick and SBrick Plus BLE hubs. Scanning,
@@ -99,14 +102,6 @@ public class SBrickScanner extends BGAPIDefaultListener {
         bgapi.addListener(this);
     }
 
-    private void sleep() {
-        try {
-            Thread.sleep(SECONDS.toMillis(2L));
-        } catch (InterruptedException e) {
-            throw sneakyThrow(e);
-        }
-    }
-
     /**
      * Read a map of all the bricks. We scan for SBricks. Unfortunately SBricks
      * do not support detection of the bricks plugged into them, so we get an
@@ -115,6 +110,7 @@ public class SBrickScanner extends BGAPIDefaultListener {
      * 
      * @return All the bricks, neatly laid out in a map.
      */
+    @SneakyThrows
     public Collection<Hub> readAll() {
         // XXX trigger a version report from the BLE112 device.
 
@@ -123,7 +119,7 @@ public class SBrickScanner extends BGAPIDefaultListener {
         bgapi.send_gap_discover(1 /* gap_discover_generic */);
 
         try {
-            sleep();
+            sleep(SECONDS.toMillis(2L));
         } finally {
             // the response to <code>send_gap_end_procedure()</code> triggers
             // the connection and interrogation process. See
@@ -133,9 +129,9 @@ public class SBrickScanner extends BGAPIDefaultListener {
 
         // wait for the addresses to all be interrogated
         while (!ble112Addresses.isEmpty()) {
-            sleep();
+            sleep(MILLISECONDS.toMillis(500L));
         }
-        sleep();
+        sleep(SECONDS.toMillis(1L));
 
         return foundHubs;
     }
@@ -271,9 +267,10 @@ public class SBrickScanner extends BGAPIDefaultListener {
      * @see org.thingml.bglib.BGAPIDefaultListener#receive_hardware_adc_read(int)
      */
     @Override
+    @SneakyThrows
     public void receive_hardware_adc_read(final int result) {
         bgapi.send_system_reset(0);
-        sleep();
+        sleep(SECONDS.toMillis(1L));
         err.printf("BLE112 device reported error 0x%04x.\n", result);
         exit(1);
     }

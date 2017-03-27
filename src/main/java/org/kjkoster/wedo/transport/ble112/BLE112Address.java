@@ -7,6 +7,8 @@ import org.thingml.bglib.BDAddr;
 
 import com.google.common.hash.HashCode;
 
+import lombok.Value;
+
 /**
  * A BLE112 MAC address. We don't use BGAPI's BDAddr class, because it does not
  * implement {@link HashCode} or equals. BDAddr also leaks its internal array,
@@ -14,6 +16,7 @@ import com.google.common.hash.HashCode;
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
+@Value
 public class BLE112Address {
     private final byte[] macBytes = new byte[6];
     private final String macString;
@@ -94,15 +97,6 @@ public class BLE112Address {
     }
 
     /**
-     * The BLE address type for this address.
-     * 
-     * @return the address_type.
-     */
-    public int getAddress_type() {
-        return address_type;
-    }
-
-    /**
      * Get the BDAddr object that the BGAPI needs. Since that object is mutable
      * we provide a (reversed) copy of our MAC address, not the address itself.
      * 
@@ -133,8 +127,9 @@ public class BLE112Address {
         if (!(obj instanceof BLE112Address)) {
             return false;
         }
-        return macString.equals(((BLE112Address) obj).macString)
-                && address_type == ((BLE112Address) obj).address_type;
+        // This is usually a bad idea, but we have the entire address encoded in
+        // the hashCode. Might as well use it.
+        return hashCode() == obj.hashCode();
     }
 
     /**

@@ -2,6 +2,8 @@ package org.kjkoster.wedo.transport.usb;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import lombok.Value;
+
 /**
  * A weak pointer to a LEGO hub of some system. Hubs may be plugged in or out at
  * any time. Due to the volatile nature of USB and BLE, we do not actually hand
@@ -13,6 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
+@Value
 public class HubHandle {
     private final String path;
     private final String productName;
@@ -28,26 +31,6 @@ public class HubHandle {
     public HubHandle(final String path, final String productName) {
         this.path = checkNotNull(path);
         this.productName = checkNotNull(productName);
-    }
-
-    /**
-     * Get the unique path for this hub. This path may or may not be valid for
-     * reuse.
-     * 
-     * @return The unique path for this hub.
-     */
-    public String getPath() {
-        return path;
-    }
-
-    /**
-     * Find the human readable product name of the hub that this packet came
-     * from.
-     * 
-     * @return The human readable product name.
-     */
-    public String getProductName() {
-        return productName;
     }
 
     /**
