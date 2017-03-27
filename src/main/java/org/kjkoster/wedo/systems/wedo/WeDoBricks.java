@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kjkoster.wedo.bricks.ActuatorValueMemory;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Distance;
@@ -43,13 +44,8 @@ public class WeDoBricks {
     private final Usb usb;
     private final boolean verbose;
 
-    /**
-     * We have to remember what value we set an actuator to. The protocol forces
-     * us to write the actuator values for bricks A and B at the same time. Even
-     * if we just want to set the value for one brick, we still have to write
-     * both values.
-     */
-    private final Map<String, Map<Character, Byte>> rememberedActuatorValues = new HashMap<>();
+    private final ActuatorValueMemory actuatorValueMemory = new ActuatorValueMemory(
+            2);
 
     /**
      * We have to remember what type an actuator has. The running motors and
@@ -302,12 +298,10 @@ public class WeDoBricks {
      */
     private synchronized void write(final Hub hub, final char port,
             final byte value) {
-        // read the 'other' value
-        final byte otherValue = lookupOtherValue(hub, port);
-        storeNewValue(hub, port, value);
+        actuatorValueMemory.write(hub, port, value);
 
-        final byte valueA = (byte) ((port == 'A' ? value : otherValue) & 0xff);
-        final byte valueB = (byte) ((port == 'A' ? otherValue : value) & 0xff);
+        final byte valueA = actuatorValueMemory.read(hub, 'A');
+        final byte valueB = actuatorValueMemory.read(hub, 'B');
         final byte[] buffer = new byte[9];
         buffer[0] = 0x00;
         buffer[1] = 0x40;
@@ -325,36 +319,6 @@ public class WeDoBricks {
         }
 
         usb.write(new HubHandle(hub.getPath(), hub.getProductName()), buffer);
-    }
-
-    private void storeNewValue(final Hub hub, final char port,
-            final byte value) {
-        Map<Character, Byte> rememberedActuatorValue = rememberedActuatorValues
-                .get(hub.getPath());
-        if (rememberedActuatorValue == null) {
-            rememberedActuatorValue = new HashMap<>();
-            rememberedActuatorValues.put(hub.getPath(),
-                    rememberedActuatorValue);
-        }
-
-        rememberedActuatorValue.put(port, value);
-    }
-
-    private byte lookupOtherValue(final Hub hub, final char port) {
-        final Map<Character, Byte> rememberedActuatorValue = rememberedActuatorValues
-                .get(hub.getPath());
-        if (rememberedActuatorValue == null) {
-            return (byte) 0x00;
-        }
-
-        // note that we look up the other port's value
-        final Byte otherValue = rememberedActuatorValue
-                .get(port == 'A' ? 'B' : 'A');
-        if (otherValue == null) {
-            return (byte) 0x00;
-        }
-
-        return otherValue;
     }
 
     /**
