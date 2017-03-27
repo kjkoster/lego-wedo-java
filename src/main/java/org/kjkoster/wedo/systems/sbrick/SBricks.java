@@ -2,7 +2,6 @@ package org.kjkoster.wedo.systems.sbrick;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.abs;
 import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.MAX_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.LIGHT;
@@ -13,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import org.kjkoster.wedo.bricks.ActuatorValueMemory;
 import org.kjkoster.wedo.bricks.Brick;
 import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Hub;
@@ -20,17 +20,24 @@ import org.kjkoster.wedo.transport.ble112.BLE112Connections;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
 
+import lombok.NonNull;
+
 /**
  * A class to represent the collection of SBricks and SBrick Pluses.
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class SBricks extends BGAPIDefaultListener {
+    private static final int HANDLE_QUICKDRIVE = 0x001e;
+
     private final List<Hub> hubs = new ArrayList<>();
 
     private final BGAPI bgapi;
 
     private final BLE112Connections ble112Connections;
+
+    private final ActuatorValueMemory actuatorValueMemory = new ActuatorValueMemory(
+            4);
 
     /**
      * @param bgapi
@@ -248,20 +255,23 @@ public class SBricks extends BGAPIDefaultListener {
         }
     }
 
-    private void actuator(final int connection, final Hub hub,
+    private void actuator(final int connection, @NonNull final Hub hub,
             final Character port, final Type type, final byte value) {
         for (final Brick brick : hub.getBricks()) {
             if ((port == null || port.equals(brick.getPort()))
                     && (type == null || type.equals(brick.getType()))) {
-                final byte data_direction = value < 0 ? (byte) 0x01
-                        : (byte) 0x00;
-                final byte data_port = (byte) (brick.getPort() - FIRST_PORT);
-                final byte data_value = (byte) (abs(value * 2) & 0xff);
-
-                final byte[] data = { 0x01, data_port, data_direction,
-                        data_value };
-                bgapi.send_attclient_attribute_write(connection, 0x001a, data);
+                actuatorValueMemory.write(hub, brick.getPort(), value);
             }
         }
+
+        final byte[] data = new byte[5];
+        data[0] = actuatorValueMemory.read(hub, 'A');
+        data[1] = actuatorValueMemory.read(hub, 'B');
+        data[2] = actuatorValueMemory.read(hub, 'C');
+        data[3] = actuatorValueMemory.read(hub, 'D');
+        data[4] = (byte) 0x00; // XXX We do not support the SBrick led yet
+
+        bgapi.send_attclient_attribute_write(connection, HANDLE_QUICKDRIVE,
+                data);
     }
 }
