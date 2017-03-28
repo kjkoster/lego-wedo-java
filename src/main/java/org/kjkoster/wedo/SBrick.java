@@ -3,7 +3,6 @@ package org.kjkoster.wedo;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Byte.parseByte;
 import static java.lang.System.out;
-import static org.apache.commons.cli.Option.builder;
 import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.NOT_CONNECTED;
 
@@ -166,8 +165,11 @@ public class SBrick {
     }
 
     static Hub parseBrick(final String hubSpec) {
-        final String[] parts = hubSpec.split(",");
+        if (hubSpec == null || hubSpec.isEmpty()) {
+            throw new IllegalArgumentException("missing required option -hub");
+        }
 
+        final String[] parts = hubSpec.split(",");
         final Brick[] bricks = new Brick[4];
         for (int i = 0; i < 4; i++) {
             final char port = (char) (FIRST_PORT + i);
@@ -189,9 +191,8 @@ public class SBrick {
         options.addOption(VERBOSE, "verbose output");
         options.addOption(BLE112DEVICE, true,
                 "the file path to your BLE112 dongle. On Mac OS X, this is typically /dev/cu.usbmodem1");
-        options.addOption(builder(HUB).required().hasArg()
-                .desc("specify the hub's MAC address and port assignment. E.g. -hub 00:77:80:2e:43:e4,MOTOR,,LIGHT")
-                .build());
+        options.addOption(HUB, true,
+                "specify the hub's MAC address and port assignment. E.g. -hub 00:77:80:2e:43:e4,MOTOR,,LIGHT");
 
         options.addOption(RESET, "reset all bricks");
         options.addOption(LIST, "list SBricks and SBrick Pluses");
