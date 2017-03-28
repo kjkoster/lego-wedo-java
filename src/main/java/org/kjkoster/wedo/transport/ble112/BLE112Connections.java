@@ -3,7 +3,10 @@ package org.kjkoster.wedo.transport.ble112;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.out;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.thingml.bglib.BDAddr;
@@ -63,19 +66,31 @@ public class BLE112Connections extends BGAPIDefaultListener {
         openNextConnection();
     }
 
+    /**
+     * Connect to an SBrick. We pick a random, unconnected brick to connect to.
+     * That way we don't get stuck trying to connect to bricks that never
+     * respond.
+     */
     private void openNextConnection() {
+        final List<BLE112Address> unconnected = new ArrayList<>(
+                connections.size());
         for (final Map.Entry<BLE112Address, Integer> connection : connections
                 .entrySet()) {
             if (connection.getValue() == null) {
-                out.printf("ble112: connecting to %s...\n",
-                        connection.getKey());
-                bgapi.send_gap_connect_direct(connection.getKey().getBDAddr(),
-                        connection.getKey().getAddress_type(),
-                        CONN_INTERVAL_MIN, CONN_INTERVAL_MAX, CONN_TIMEOUT,
-                        CONN_LATENCY);
-                return; // bail out, the response will trigger the rest
+                unconnected.add(connection.getKey());
             }
         }
+
+        if (unconnected.size() == 0) {
+            return; // nothing to connect, bail out...
+        }
+
+        Collections.shuffle(unconnected);
+        final BLE112Address connection = unconnected.get(0);
+        out.printf("ble112: connecting to %s...\n", connection);
+        bgapi.send_gap_connect_direct(connection.getBDAddr(),
+                connection.getAddress_type(), CONN_INTERVAL_MIN,
+                CONN_INTERVAL_MAX, CONN_TIMEOUT, CONN_LATENCY);
     }
 
     /**
