@@ -1,60 +1,73 @@
 package org.kjkoster.wedo.bricks;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.kjkoster.wedo.bricks.Brick.Type.DISTANCE;
 import static org.kjkoster.wedo.bricks.Brick.Type.TILT;
 
-import org.kjkoster.wedo.usb.Handle;
+import lombok.Value;
 
 /**
- * The representation of a single LEGO WeDo brick. To be precise, this is the
+ * The representation of a single LEGO brick. To be precise, this is the
  * representation of a connector on a hub. Empty spots are represented as bricks
- * too, of a not connected type.
+ * too, of a &quot;not connected&quot; type.
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
+@Value
 public class Brick {
-    private final Handle handle;
-    private final boolean isA;
+    /**
+     * The first port on all bricks.
+     */
+    public static final char FIRST_PORT = 'A';
 
-    private final byte id;
+    /**
+     * Each system has its own port limit, but the overall port range is limited
+     * by <code>MAX_PORT</code>.
+     */
+    public static final char MAX_PORT = 'D';
+
+    private final char port;
     private final Type type;
-
     private final byte value;
 
     /**
      * Create a new brick representation.
      * 
-     * @param handle
-     *            The USB device handle of the device that this brick is
-     *            connected to.
-     * @param isA
-     *            <code>true</code> if this is on connector A of the WeDo hub,
-     *            or <code>false</code>if this comes from connector B.
+     * @param port
+     *            The capital letter designating the port on the hub that this
+     *            brick is connected to.
      * @param type
      *            The type of brick.
-     * @param id
-     *            The value of the ID byte that was read from the WeDo hub.
+     */
+    public Brick(final char port, final Type type) {
+        this(port, type, (byte) 0x00);
+    }
+
+    /**
+     * Create a new brick representation.
+     * 
+     * @param port
+     *            The capital letter designating the port on the hub that this
+     *            brick is connected to.
+     * @param type
+     *            The type of brick.
      * @param value
      *            The value of the value byte that was read from the WeDo hub.
      */
-    public Brick(final Handle handle, final boolean isA, final Type type,
-            final byte id, final byte value) {
-        this.handle = checkNotNull(handle);
-        this.isA = isA;
-        this.type = checkNotNull(type);
-        this.id = id;
+    public Brick(final char port, final Type type, final byte value) {
+        super();
+
+        checkArgument(port >= FIRST_PORT && port <= MAX_PORT, "invalid port %s",
+                port);
+        this.port = port;
+
+        checkNotNull(type);
+        this.type = type;
+
         this.value = value;
-    }
-
-    Handle getHandle() {
-        return handle;
-    }
-
-    boolean isA() {
-        return isA;
     }
 
     /**
@@ -91,15 +104,6 @@ public class Brick {
          * Something unknown is connected at this connector.
          */
         UNKNOWN
-    }
-
-    /**
-     * Find the type of the brick that is connected at this place.
-     * 
-     * @return The brick's type.
-     */
-    public Type getType() {
-        return type;
     }
 
     /**
@@ -141,7 +145,7 @@ public class Brick {
             sensorData = "";
         }
 
-        return format("[%s brick %s: %s id: 0x%02x value: 0x%02x%s]", handle,
-                (isA ? "A" : "B"), type, id, value, sensorData);
+        return format("[port %c: %s value: 0x%02x%s]", port, type, value,
+                sensorData);
     }
 }

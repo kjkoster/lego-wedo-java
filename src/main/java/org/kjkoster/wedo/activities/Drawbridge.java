@@ -14,8 +14,8 @@ import java.util.Collection;
 
 import org.kjkoster.wedo.bricks.Tilt;
 import org.kjkoster.wedo.bricks.Tilt.Direction;
-import org.kjkoster.wedo.bricks.WeDoBricks;
-import org.kjkoster.wedo.usb.Usb;
+import org.kjkoster.wedo.systems.wedo.WeDoBricks;
+import org.kjkoster.wedo.transport.usb.Usb;
 
 /**
  * The drawbridge is interesting because of the limitations of the tilt sensor
