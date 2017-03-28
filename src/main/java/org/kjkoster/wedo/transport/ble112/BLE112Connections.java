@@ -2,16 +2,25 @@ package org.kjkoster.wedo.transport.ble112;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.System.out;
+import static java.lang.Thread.sleep;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.thingml.bglib.BDAddr;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPIDefaultListener;
+
+import lombok.SneakyThrows;
 
 /**
  * A central connection manager to establish and maintain Bluetooth Low Energy
@@ -20,7 +29,8 @@ import org.thingml.bglib.BGAPIDefaultListener;
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class BLE112Connections extends BGAPIDefaultListener {
+public class BLE112Connections extends BGAPIDefaultListener
+        implements Closeable {
     /**
      * The minimum connection event interval. This value is measured in 1.25 ms
      * units and has a range of 7.5 ms to 4 seconds.
@@ -48,7 +58,18 @@ public class BLE112Connections extends BGAPIDefaultListener {
     public static final int CONN_LATENCY = 0x00;
 
     private final BGAPI bgapi;
+    private final Thread watchdog;
+
+    /**
+     * Our records of the connections that we maintain. This class works to
+     * maintain a stable connection to each item on this map.
+     */
     private final Map<BLE112Address, Integer> connections = new HashMap<>();
+
+    /**
+     * A set of connections that we should disconnect and the next opportunity.
+     */
+    private final Set<Integer> toDisconnect = new HashSet<>();
 
     /**
      * Set up a new connection manager.
@@ -56,14 +77,74 @@ public class BLE112Connections extends BGAPIDefaultListener {
      * @param bgapi
      *            The BGAPI to use.
      */
+    @SneakyThrows
     public BLE112Connections(final BGAPI bgapi) {
         super();
 
         checkNotNull(bgapi, "null bgapi");
         this.bgapi = bgapi;
-        bgapi.addListener(this);
 
-        openNextConnection();
+        // clear any lingering connections before we start connecting
+        toDisconnect.add(0);
+        toDisconnect.add(1);
+        toDisconnect.add(2);
+
+        bgapi.addListener(this);
+        checkConnections();
+
+        watchdog = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    for (;;) {
+                        sleep(SECONDS.toMillis(2L));
+                        checkConnections();
+                    }
+                } catch (InterruptedException e) {
+                    return;// clean shutdown
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+        }, "BLE112 connections watchdog");
+        watchdog.start();
+    }
+
+    /**
+     * @see java.io.Closeable#close()
+     */
+    @Override
+    @SneakyThrows
+    public void close() throws IOException {
+        toDisconnect.addAll(connections.values());
+        connections.clear();
+
+        toDisconnect.add(0);
+        toDisconnect.add(1);
+        toDisconnect.add(2);
+
+        while (toDisconnect.size() > 0) {
+            sleep(MILLISECONDS.toMillis(100L));
+        }
+
+        watchdog.interrupt();
+        bgapi.removeListener(this);
+        watchdog.join();
+    }
+
+    private void checkConnections() {
+        if (toDisconnect.size() > 0) {
+            closeAnyConnection();
+        } else {
+            openAnyNewConnection();
+        }
+    }
+
+    private void closeAnyConnection() {
+        final Integer connection = toDisconnect.iterator().next();
+        toDisconnect.remove(connection);
+
+        bgapi.send_connection_disconnect(connection);
     }
 
     /**
@@ -71,7 +152,7 @@ public class BLE112Connections extends BGAPIDefaultListener {
      * That way we don't get stuck trying to connect to bricks that never
      * respond.
      */
-    private void openNextConnection() {
+    private void openAnyNewConnection() {
         final List<BLE112Address> unconnected = new ArrayList<>(
                 connections.size());
         for (final Map.Entry<BLE112Address, Integer> connection : connections
@@ -114,7 +195,7 @@ public class BLE112Connections extends BGAPIDefaultListener {
             out.printf("ble112: disconnected from %s.\n", address.toString());
         }
 
-        openNextConnection();
+        checkConnections();
     }
 
     /**
@@ -136,7 +217,7 @@ public class BLE112Connections extends BGAPIDefaultListener {
             }
         }
 
-        openNextConnection();
+        checkConnections();
     }
 
     /**
@@ -148,6 +229,10 @@ public class BLE112Connections extends BGAPIDefaultListener {
             final int connection_handle) {
         switch (result) {
         case 0x0000: /* ok */
+            break;
+        case 0x0209: /* connection limit exceeded */
+            // force a reconnect
+            toDisconnect.add(connection_handle);
             break;
         default:
             out.printf("ble112: connection error 0x%04x.\n", result);
@@ -163,7 +248,7 @@ public class BLE112Connections extends BGAPIDefaultListener {
     public void add(final BLE112Address ble112Address) {
         connections.putIfAbsent(ble112Address, null);
 
-        openNextConnection();
+        checkConnections();
     }
 
     /**

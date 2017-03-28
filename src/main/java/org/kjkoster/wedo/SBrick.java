@@ -30,6 +30,8 @@ import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPITransport;
 
+import lombok.Cleanup;
+
 /**
  * The Vengit SBrick and SBrick Plus command line tool's main entry point.
  * 
@@ -98,6 +100,7 @@ public class SBrick {
                 final Collection<Hub> hubs = new ArrayList<>();
                 hubs.add(parseBrick(commandLine.getOptionValue(HUB)));
 
+                @Cleanup
                 final BLE112Connections ble112Connections = new BLE112Connections(
                         bgapi);
                 final SBricks sBricks = new SBricks(bgapi, ble112Connections,
