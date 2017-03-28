@@ -111,15 +111,11 @@ public class SBrickScanner extends BGAPIDefaultListener {
      * @return All the bricks, neatly laid out in a map.
      */
     @SneakyThrows
-    public Collection<Hub> readAll() {
-        // XXX trigger a version report from the BLE112 device.
-
-        bgapi.send_gap_set_scan_parameters(SCAN_INTERVAL, SCAN_WINDOW,
-                SCAN_ACTIVE);
-        bgapi.send_gap_discover(1 /* gap_discover_generic */);
+    public Collection<Hub> scan() {
+        bgapi.send_system_get_info();
 
         try {
-            sleep(SECONDS.toMillis(2L));
+            sleep(SECONDS.toMillis(3L));
         } finally {
             // the response to <code>send_gap_end_procedure()</code> triggers
             // the connection and interrogation process. See
@@ -134,6 +130,32 @@ public class SBrickScanner extends BGAPIDefaultListener {
         sleep(SECONDS.toMillis(1L));
 
         return foundHubs;
+    }
+
+    /**
+     * @see org.thingml.bglib.BGAPIDefaultListener#receive_system_get_info(int,
+     *      int, int, int, int, int, int)
+     */
+    @Override
+    public void receive_system_get_info(int major, int minor, int patch,
+            int build, int ll_version, int protocol_version, int hw) {
+        out.printf(
+                "BLE112 found, version %d.%d.%d-%d, ll version: %d, protocol: %d, hardware: %d.\n",
+                major, minor, patch, build, ll_version, protocol_version, hw);
+        bgapi.send_system_get_connections();
+    }
+
+    /**
+     * @see org.thingml.bglib.BGAPIDefaultListener#receive_system_get_connections(int)
+     */
+    @Override
+    public void receive_system_get_connections(int maxconn) {
+        out.printf(
+                "This BLE112 device supports up to %d connections. Consult your device manual on how to increase that if you need more connections.\n\n",
+                maxconn);
+        bgapi.send_gap_set_scan_parameters(SCAN_INTERVAL, SCAN_WINDOW,
+                SCAN_ACTIVE);
+        bgapi.send_gap_discover(1 /* gap_discover_generic */);
     }
 
     private void connectNextAddress() {

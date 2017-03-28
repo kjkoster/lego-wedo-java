@@ -240,7 +240,7 @@ public class SBrick {
                 "Scanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
         final SBrickScanner sBrickScanner = new SBrickScanner(bgapi);
-        final Collection<Hub> hubs = sBrickScanner.readAll();
+        final Collection<Hub> hubs = sBrickScanner.scan();
         if (hubs.size() == 0) {
             out.printf("No SBricks or SBrick Pluses found.\n");
         } else {
