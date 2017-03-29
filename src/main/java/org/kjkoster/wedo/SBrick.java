@@ -5,11 +5,10 @@ import static java.lang.Byte.parseByte;
 import static java.lang.System.out;
 import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.NOT_CONNECTED;
+import static org.kjkoster.wedo.transport.ble112.BGAPITransportFactory.newBGAPITransport;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,9 +84,7 @@ public class SBrick {
                 ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
         checkNotNull(ble112Device, "null ble112 device");
-        final BGAPITransport bgapiTransport = new BGAPITransport(
-                new FileInputStream(ble112Device),
-                new FileOutputStream(ble112Device));
+        final BGAPITransport bgapiTransport = newBGAPITransport(ble112Device);
         final BGAPI bgapi = new BGAPI(bgapiTransport);
         if (verbose) {
             bgapi.addListener(new ProtocolLogger());
