@@ -1,25 +1,17 @@
 package org.kjkoster.wedo.transport.ble112;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static gnu.io.SerialPort.DATABITS_8;
-import static gnu.io.SerialPort.FLOWCONTROL_RTSCTS_IN;
-import static gnu.io.SerialPort.FLOWCONTROL_RTSCTS_OUT;
-import static gnu.io.SerialPort.PARITY_NONE;
-import static gnu.io.SerialPort.STOPBITS_1;
+import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_SEMI_BLOCKING;
+import static java.lang.System.getProperty;
+import static java.lang.System.out;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
 
 import org.thingml.bglib.BGAPITransport;
 
-import com.jamierf.rxtx.RXTXLoader;
-import com.jamierf.rxtx.RXTXLoader.OperatingSystem;
+import com.fazecast.jSerialComm.SerialPort;
 
-import gnu.io.CommPort;
-import gnu.io.CommPortIdentifier;
-import gnu.io.SerialPort;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 
@@ -37,7 +29,7 @@ import lombok.experimental.UtilityClass;
  */
 @UtilityClass
 public class BGAPITransportFactory {
-    private static boolean nativeLibraryLoaded = false;
+    private static final String osName = getProperty("os.name").toLowerCase();
 
     /**
      * Factory to generate BLE112 devices in a platform-independent manner.
@@ -47,8 +39,9 @@ public class BGAPITransportFactory {
      * @return The internal representation of the BLE112 device.
      */
     public static BGAPITransport newBGAPITransport(final File ble112Device) {
-        switch (OperatingSystem.get()) {
-        case MAC_OSX:
+        out.printf("using os.name %s\n", osName); // XXX
+        switch (osName) {
+        case "macosx":
             return newBGAPITransport_MacOSX(ble112Device);
         default:
             return newBGAPITransport_others(ble112Device);
@@ -65,35 +58,22 @@ public class BGAPITransportFactory {
     @SneakyThrows
     private static BGAPITransport newBGAPITransport_others(
             final File ble112Device) {
-        if (!nativeLibraryLoaded) {
-            RXTXLoader.load();
-            nativeLibraryLoaded = true;
+        out.printf("Detected %d serial ports:\n",
+                SerialPort.getCommPorts().length); // XXX
+        for (final SerialPort serialPort : SerialPort.getCommPorts()) {
+            out.printf("  port: %s, /dev/%s, baudrate: %d, timeout: %d\n",
+                    serialPort.getDescriptivePortName(),
+                    serialPort.getSystemPortName(), serialPort.getBaudRate(), serialPort.getReadTimeout()); // XXX
         }
 
-        final SerialPort serialPort = openSerialPort(ble112Device);
-        return new BGAPITransport(serialPort.getInputStream(),
-                serialPort.getOutputStream());
-    }
+        final SerialPort ble112Port = SerialPort
+                .getCommPort(ble112Device.getAbsolutePath());
+        ble112Port.openPort();
+        ble112Port.setComPortTimeouts(TIMEOUT_READ_SEMI_BLOCKING, 100,
+                0 /* XXX magic */);
+        return new BGAPITransport(ble112Port.getInputStream(),
+                ble112Port.getOutputStream());
 
-    @SneakyThrows
-    private static SerialPort openSerialPort(final File ble112Device) {
-        final CommPortIdentifier portIdentifier = CommPortIdentifier
-                .getPortIdentifier(ble112Device.getAbsolutePath());
-        if (portIdentifier.isCurrentlyOwned()) {
-            throw new IOException(ble112Device + " is in use");
-        }
-
-        final CommPort commPort = portIdentifier.open("BLED112", 2000);
-        checkArgument(commPort instanceof SerialPort, "%s is not a serial port",
-                ble112Device);
-
-        final SerialPort serialPort = (SerialPort) commPort;
-        serialPort.setSerialPortParams(115200, DATABITS_8, STOPBITS_1,
-                PARITY_NONE);
-        serialPort.setFlowControlMode(
-                FLOWCONTROL_RTSCTS_IN | FLOWCONTROL_RTSCTS_OUT);
-        serialPort.setRTS(true);
-
-        return serialPort;
+        // XXX close()?
     }
 }
