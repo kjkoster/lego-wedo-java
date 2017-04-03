@@ -68,6 +68,7 @@ public class BGAPITransportFactory {
 
         final SerialPort ble112Port = SerialPort
                 .getCommPort(ble112Device.getAbsolutePath());
+        ble112Port.setBaudRate(115200);
         ble112Port.openPort();
         ble112Port.setComPortTimeouts(TIMEOUT_READ_SEMI_BLOCKING, 100,
                 0 /* XXX magic */);
