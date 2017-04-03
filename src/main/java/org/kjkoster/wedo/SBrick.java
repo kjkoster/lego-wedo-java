@@ -1,15 +1,16 @@
 package org.kjkoster.wedo;
 
+import static com.fazecast.jSerialComm.SerialPort.TIMEOUT_READ_SEMI_BLOCKING;
+import static com.fazecast.jSerialComm.SerialPort.getCommPort;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Byte.parseByte;
 import static java.lang.System.out;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.kjkoster.wedo.bricks.Brick.FIRST_PORT;
 import static org.kjkoster.wedo.bricks.Brick.Type.NOT_CONNECTED;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,6 +30,8 @@ import org.kjkoster.wedo.transport.ble112.BLE112Connections;
 import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPITransport;
+
+import com.fazecast.jSerialComm.SerialPort;
 
 import lombok.Cleanup;
 
@@ -85,17 +88,26 @@ public class SBrick {
                 ? new File(commandLine.getOptionValue(BLE112DEVICE)) : null;
 
         checkNotNull(ble112Device, "null ble112 device");
-        final BGAPITransport bgapiTransport = new BGAPITransport(
-                new FileInputStream(ble112Device),
-                new FileOutputStream(ble112Device));
-        final BGAPI bgapi = new BGAPI(bgapiTransport);
-        if (verbose) {
-            bgapi.addListener(new ProtocolLogger());
-        }
+        final SerialPort ble112Port = getCommPort(
+                ble112Device.getAbsolutePath());
+        ble112Port.setBaudRate(115200);
+
+        BGAPI bgapi = null;
 
         try {
+            ble112Port.openPort();
+            ble112Port.setComPortTimeouts(TIMEOUT_READ_SEMI_BLOCKING,
+                    (int) MILLISECONDS.toMillis(100L) /* read timeout */,
+                    (int) MILLISECONDS.toMillis(0L) /* write timeout */);
+            final BGAPITransport bgapiTransport = new BGAPITransport(
+                    ble112Port.getInputStream(), ble112Port.getOutputStream());
+            bgapi = new BGAPI(bgapiTransport);
+            if (verbose) {
+                bgapi.addListener(new ProtocolLogger());
+            }
+
             if (commandLine.hasOption(LIST)) {
-                list(bgapi);
+                list(verbose, bgapi);
             } else {
                 final Collection<Hub> hubs = new ArrayList<>();
                 hubs.add(parseBrick(commandLine.getOptionValue(HUB)));
@@ -161,9 +173,13 @@ public class SBrick {
         } catch (Throwable e) {
             e.printStackTrace();
         } finally {
-            bgapi.listeners.clear();
-            bgapi.send_system_reset(0);
-            bgapi.disconnect();
+            if (bgapi != null) {
+                bgapi.listeners.clear();
+                bgapi.send_system_reset(0);
+                bgapi.disconnect();
+            }
+
+            ble112Port.closePort();
         }
     }
 
@@ -238,7 +254,18 @@ public class SBrick {
         return commandLineParser.parse(options, arguments);
     }
 
-    private static void list(final BGAPI bgapi) throws IOException {
+    private static void list(final boolean verbose, final BGAPI bgapi)
+            throws IOException {
+        if (verbose) {
+            out.printf("Found %d serial ports:\n",
+                    SerialPort.getCommPorts().length);
+            for (final SerialPort serialPort : SerialPort.getCommPorts()) {
+                out.printf("  /dev/%s (%s)\n", serialPort.getSystemPortName(),
+                        serialPort.getDescriptivePortName());
+            }
+            out.printf("\n");
+        }
+
         out.printf(
                 "Scanning for Vengit SBricks and SBrick Pluses (this may take a few seconds)...\n\n");
 
