@@ -144,7 +144,9 @@ public class BLE112Connections extends BGAPIDefaultListener
         final Integer connection = toDisconnect.iterator().next();
         toDisconnect.remove(connection);
 
-        bgapi.send_connection_disconnect(connection);
+        if (connection != null) {
+            bgapi.send_connection_disconnect(connection);
+        }
     }
 
     /**
