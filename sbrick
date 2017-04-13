@@ -9,4 +9,4 @@ elif [ -e /dev/ttyACM0 ]; then
 	ARGS="${ARGS} -ble112 /dev/ttyACM0"
 fi
 
-java -cp target/wedo-0.0.1-SNAPSHOT.jar org.kjkoster.wedo.SBrick ${ARGS} ${*}
+java -cp target/lego-wedo-java-*-fatjar.jar org.kjkoster.wedo.SBrick ${ARGS} ${*}
