@@ -2,8 +2,28 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.kjkoster</groupId>
-	<artifactId>wedo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<artifactId>lego-wedo-java</artifactId>
+	<version>2.1</version>
+
+	<name>org.kjkoster:lego-wedo-java</name>
+	<description>A Java library for LEGO WeDo and for Vengit SBrick and SBrick Plus.</description>
+	<url>https://github.com/kjkoster/lego-wedo-java</url>
+
+	<developers>
+		<developer>
+			<name>Kees Jan Koster</name>
+			<email>kjkoster@kjkoster.org</email>
+			<organization>kjkoster.org</organization>
+			<organizationUrl>http://kjkoster.org/</organizationUrl>
+		</developer>
+	</developers>
+
+
+	<scm>
+		<url>https://github.com/kjkoster/lego-wedo-java</url>
+		<connection>scm:git:git@github.com:kjkoster/lego-wedo-java.git</connection>
+		<developerConnection>scm:git:git@github.com:kjkoster/lego-wedo-java.git</developerConnection>
+	</scm>
 
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
@@ -97,6 +117,59 @@
 								</filter>
 							</filters>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<!-- plugins for Maven Central release management -->
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.8</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.6</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.10.4</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
