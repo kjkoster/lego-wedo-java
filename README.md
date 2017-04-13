@@ -1,5 +1,5 @@
 # lego-wedo-java
-Another Java library for LEGO WeDo. This library supports multiple LEGO WeDo hubs. It also comes with a simple command line utility to control LEGO WeDo bricks from the command line.
+A Java library for LEGO WeDo and for Vengit SBrick and SBrick Plus. It also comes with simple command line utilities to test controlling LEGO WeDo hubs and SBricks from the command line.
 
 # Getting Started
 Here's a quick way to get started using the command line. First, clone and build the code.
