@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.kjkoster</groupId>
 	<artifactId>lego-wedo-java</artifactId>
-	<version>2.1</version>
+	<version>2.2-SNAPSHOT</version>
 
 	<name>org.kjkoster:lego-wedo-java</name>
 	<description>A Java library for LEGO WeDo and for Vengit SBrick and SBrick Plus.</description>
