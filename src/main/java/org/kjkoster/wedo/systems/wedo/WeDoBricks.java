@@ -55,6 +55,23 @@ public class WeDoBricks {
 
     /**
      * Create a new WeDo bricks abstraction layer.
+     */
+    public WeDoBricks() {
+        this(new Usb(false), false);
+    }
+
+    /**
+     * Create a new WeDo bricks abstraction layer.
+     * 
+     * @param verbose
+     *            Print a trace of all interaction with the LEGO WeDo bricks.
+     */
+    public WeDoBricks(final boolean verbose) {
+        this(new Usb(verbose), verbose);
+    }
+
+    /**
+     * Create a new WeDo bricks abstraction layer.
      * 
      * @param usb
      *            The USB subsystem that this layer uses for accessing the
