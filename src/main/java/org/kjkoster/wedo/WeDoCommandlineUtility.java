@@ -26,7 +26,7 @@ import org.kjkoster.wedo.transport.usb.Usb;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class WeDo {
+public class WeDoCommandlineUtility {
     private static final String VERBOSE = "v";
 
     private static final String RESET = "reset";

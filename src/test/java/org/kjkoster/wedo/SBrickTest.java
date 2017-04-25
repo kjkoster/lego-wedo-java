@@ -18,7 +18,7 @@ public class SBrickTest {
      */
     @Test
     public void testOnePort() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf,light");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf,light");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -33,7 +33,7 @@ public class SBrickTest {
      */
     @Test
     public void testOnePortAndLotsOfCommas() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf,light,,,,,,");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf,light,,,,,,");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -48,7 +48,7 @@ public class SBrickTest {
      */
     @Test
     public void testJustCommas() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf,,,,,,,");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf,,,,,,,");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -63,7 +63,7 @@ public class SBrickTest {
      */
     @Test
     public void testFewCommas() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf,,");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf,,");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -78,7 +78,7 @@ public class SBrickTest {
      */
     @Test
     public void testNoCommas() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -93,7 +93,7 @@ public class SBrickTest {
      */
     @Test
     public void testTwoPorts() {
-        final Hub hub = SBrick.parseBrick("0:7:80:d0:52:bf,,light,motor");
+        final Hub hub = SBrickCommandlineUtility.parseBrick("0:7:80:d0:52:bf,,light,motor");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),
                 hub.getBLE112Address());
@@ -108,7 +108,7 @@ public class SBrickTest {
      */
     @Test
     public void testAllPorts() {
-        final Hub hub = SBrick
+        final Hub hub = SBrickCommandlineUtility
                 .parseBrick("0:7:80:d0:52:bf,Motor,light,motor,tilt");
 
         assertEquals(new BLE112Address("0:7:80:d0:52:bf", 0),

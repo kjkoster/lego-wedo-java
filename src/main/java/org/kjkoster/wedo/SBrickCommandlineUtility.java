@@ -40,7 +40,7 @@ import lombok.Cleanup;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class SBrick {
+public class SBrickCommandlineUtility {
     private static final String VERBOSE = "v";
     private static final String BLE112DEVICE = "ble112";
     private static final String HUB = "hub";

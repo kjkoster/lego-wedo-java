@@ -3,4 +3,4 @@
 # A command line utility to interface with LEGO WeDo blocks.
 #
 
-java -cp target/lego-wedo-java-*-fatjar.jar org.kjkoster.wedo.WeDo ${*}
+java -cp target/lego-wedo-java-*-fatjar.jar org.kjkoster.wedo.WeDoCommandlineUtility ${*}
