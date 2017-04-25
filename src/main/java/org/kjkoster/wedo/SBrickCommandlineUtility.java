@@ -26,7 +26,6 @@ import org.kjkoster.wedo.bricks.Brick.Type;
 import org.kjkoster.wedo.bricks.Hub;
 import org.kjkoster.wedo.systems.sbrick.SBrickScanner;
 import org.kjkoster.wedo.systems.sbrick.SBricks;
-import org.kjkoster.wedo.transport.ble112.BLE112Connections;
 import org.kjkoster.wedo.transport.ble112.ProtocolLogger;
 import org.thingml.bglib.BGAPI;
 import org.thingml.bglib.BGAPITransport;
@@ -113,10 +112,7 @@ public class SBrickCommandlineUtility {
                 hubs.add(parseBrick(commandLine.getOptionValue(HUB)));
 
                 @Cleanup
-                final BLE112Connections ble112Connections = new BLE112Connections(
-                        bgapi);
-                final SBricks sBricks = new SBricks(bgapi, ble112Connections,
-                        hubs);
+                final SBricks sBricks = new SBricks(bgapi, hubs);
 
                 Thread.sleep(1000L);
 

@@ -40,6 +40,28 @@ public class SBricks extends BGAPIDefaultListener implements AutoCloseable {
             4);
 
     /**
+     * Create a new SBrick API that can be used to access all SBricks.
+     * 
+     * @param bgapi
+     *            The BGAPI interface that we can use to send commands.
+     * @param hubs
+     *            The definition of all SBrick hubs. Unlike WeDo (for example)
+     *            SBrick's protocol does not have facilities to detect what
+     *            brick is connected on what port of the hub. Instead, we have
+     *            to rely on that information being supplied.
+     * @throws FileNotFoundException
+     *             When the specified device could not be opened.
+     */
+    public SBricks(final BGAPI bgapi, final Collection<Hub> hubs)
+            throws FileNotFoundException {
+        this(bgapi, new BLE112Connections(bgapi), hubs);
+    }
+
+    /**
+     * Create a new SBrick API that can be used to access all SBricks. This is
+     * the detailed constructor that is not usually used. Instead, consider
+     * using one of the other convenience constructors.
+     * 
      * @param bgapi
      *            The BGAPI interface that we can use to send commands.
      * @param ble112Connections
