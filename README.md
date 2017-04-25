@@ -38,15 +38,9 @@ if (file.exists()) {
 }
 ```
 
-That is all. I thought to add it to the WeDoBricks class, but that would just hide the controls for you. So here it is. I'm not adding sound support to this WeDO library, simply because Java already makes that super easy.
+That is all. I thought to add it to the WeDoBricks class, but that would just hide the controls for you. So here it is. I'm not adding sound support to this WeDo library, simply because Java already makes that super easy.
 
 # Reference
-This code was written using these projects as a reference:
-- https://github.com/itdaniher/WeDoMore
-- https://github.com/Salaboy/lego-wedo4j
-- https://github.com/PetrGlad/lego-wedo4j
-- https://github.com/LLK/scratchx/blob/gh-pages/scratch_extensions/wedoExtension.js
 - https://gist.github.com/blindman2k/11353842
-
 https://social.sbrick.com/wiki/view/pageId/11/slug/the-sbrick-ble-protocol
 https://social.sbrick.com/wiki/view/pageId/20/slug/linux-client-scripts
