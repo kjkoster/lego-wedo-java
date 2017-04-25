@@ -8,7 +8,6 @@ import static java.lang.System.err;
 import static java.lang.System.out;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,7 @@ import lombok.SneakyThrows;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class Usb implements Closeable {
+public class Usb implements AutoCloseable {
     private static final int VENDORID_LEGO = 0x0694;
     private static final int PRODUCTID_WEDOHUB = 0x0003;
 
@@ -176,7 +175,7 @@ public class Usb implements Closeable {
     }
 
     /**
-     * @see java.io.Closeable#close()
+     * @see java.lang.AutoCloseable#close()
      */
     @Override
     @SneakyThrows

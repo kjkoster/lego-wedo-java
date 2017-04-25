@@ -27,7 +27,7 @@ import lombok.NonNull;
  *
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class SBricks extends BGAPIDefaultListener {
+public class SBricks extends BGAPIDefaultListener implements AutoCloseable {
     private static final int HANDLE_QUICKDRIVE = 0x001e;
 
     private final List<Hub> hubs = new ArrayList<>();
@@ -70,6 +70,15 @@ public class SBricks extends BGAPIDefaultListener {
         for (final Hub hub : hubs) {
             ble112Connections.add(hub.getBLE112Address());
         }
+    }
+
+    /**
+     * @see java.lang.AutoCloseable#close()
+     */
+    @Override
+    public void close() throws Exception {
+        ble112Connections.close();
+        bgapi.disconnect();
     }
 
     /**

@@ -40,7 +40,7 @@ import org.kjkoster.wedo.transport.usb.Usb;
  * 
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
-public class WeDoBricks {
+public class WeDoBricks implements AutoCloseable {
     private final Usb usb;
     private final boolean verbose;
 
@@ -82,6 +82,14 @@ public class WeDoBricks {
     public WeDoBricks(final Usb usb, final boolean verbose) {
         this.usb = checkNotNull(usb);
         this.verbose = verbose;
+    }
+
+    /**
+     * @see java.lang.AutoCloseable#close()
+     */
+    @Override
+    public void close() throws Exception {
+        usb.close();
     }
 
     /**

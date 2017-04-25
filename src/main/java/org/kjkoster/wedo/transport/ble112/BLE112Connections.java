@@ -6,7 +6,6 @@ import static java.lang.Thread.sleep;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,7 +29,7 @@ import lombok.SneakyThrows;
  * @author Kees Jan Koster &lt;kjkoster@kjkoster.org&gt;
  */
 public class BLE112Connections extends BGAPIDefaultListener
-        implements Closeable {
+        implements AutoCloseable {
     /**
      * The minimum connection event interval. This value is measured in 1.25 ms
      * units and has a range of 7.5 ms to 4 seconds.
@@ -111,7 +110,7 @@ public class BLE112Connections extends BGAPIDefaultListener
     }
 
     /**
-     * @see java.io.Closeable#close()
+     * @see java.lang.AutoCloseable#close()
      */
     @Override
     @SneakyThrows
